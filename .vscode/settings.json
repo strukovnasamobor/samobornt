@@ -1,0 +1,11 @@
+{
+    "workbench.colorTheme": "Tomorrow Night Blue",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "git.enableSmartCommit": true,
+    "git.confirmSync": false,
+    "workbench.iconTheme": "monospace-icons",
+    "terminal.integrated.focusAfterRun": "terminal"
+}
