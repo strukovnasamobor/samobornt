@@ -1,14 +1,12 @@
-# AppName
+# Samobor N&T
 
-<a href="https://domain.com" target="_blank">
-  <img src="public/images/header.png" height="240" alt="AppName"/>
+<a href="https://samobornt.web.app" target="_blank">
+  <img src="public/images/header.png" height="240" alt="Samobor N&T"/>
 </a>
 
-Web App:<br>https://domain.com<br><br>
+Web App:<br>https://samobornt.web.app<br><br>
 
-Support:<br>paypal-link<br><br>
-
-<a href="https://play.google.com/store/apps/details?id=hr.strukovnasamobor.app_id" target="_blank">
+<a href="https://play.google.com/store/apps/details?id=hr.strukovnasamobor.samobornt" target="_blank">
   <img src="public/images/google_play_badge.png" height="40" alt="Get It On Google Play"/>
 </a>
 

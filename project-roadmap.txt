@@ -1,2 +1,10 @@
 CURRENT VERSION
 Ver. 1.0.0 (1)
+
+- refactor code iz samobornt-web (tabovi Znamenitosti, Mapa i Postavke, maknuti header)
+- koristiti embedded iframe rontomap (kao embedded za web + geolocatiom)
+- napraviti jednu rutu i dodati markere u rontomap i spremiti kolekciju s posebnim imenom u firebase
+- implementirati ostale funkcionlanosti iz samobornt-android i samobornt-ar
+
+- napraviti android-capacitor
+- objaviti na Google Play
