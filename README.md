@@ -6,7 +6,7 @@
 
 Web App:<br>https://samobornt.web.app<br><br>
 
-<a href="https://play.google.com/store/apps/details?id=hr.strukovnasamobor.samobornt" target="_blank">
+<a href="https://play.google.com/store/apps/details?id=com.strukovnasamobor.samobornt" target="_blank">
   <img src="public/images/google_play_badge.png" height="40" alt="Get It On Google Play"/>
 </a>
 

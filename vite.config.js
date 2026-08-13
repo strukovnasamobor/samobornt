@@ -16,7 +16,7 @@ export default defineConfig({
         "i18n/hr.json",
       ],
       manifest: {
-        id: "hr.strukovnasamobor.samobornt",
+        id: "com.strukovnasamobor.samobornt",
         name: "Samobor N&T",
         short_name: "Samobor N&T",
         theme_color: "#000000",
