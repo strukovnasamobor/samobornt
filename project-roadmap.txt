@@ -1,6 +1,10 @@
-- functionalities from samobornt-web/android i samobornt-ar
-    - adding cards in sights
-    - adding search in header in sights
+- adding cards in sights
+- adding search in header in sights
+- click on card opening card detail
+- in card detail add show on map and open ar
+- click on marker opening card detail
+- click on image open image fullscreen zoomable view
+- settings tab - ligh/dark/mode, language, about, privacy_policy, source code
 
 - making android-capacitor
 - publish on Google Play

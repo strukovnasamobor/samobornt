@@ -13,7 +13,7 @@ export default defineConfig({
         id: "com.strukovnasamobor.samobornt",
         name: "Samobor N&T",
         short_name: "Samobor N&T",
-        theme_color: "#000000",
+        theme_color: "#760513",
         background_color: "#9e0020",
         display: "standalone",
         orientation: "portrait",
