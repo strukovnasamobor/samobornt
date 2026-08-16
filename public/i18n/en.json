@@ -1,0 +1,23 @@
+{
+  "tabs": {
+    "map": "Map",
+    "sights": "Sights",
+    "settings": "Settings"
+  },
+  "navigation": {
+    "map": "MAP",
+    "sights": "SIGHTS",
+    "settings": "SETTINGS"
+  },
+  "alert": "Alert",
+  "ok": "Ok",
+  "close": "Close",
+  "loading": "Loading...",
+  "reset": "Reset",
+  "changeLanguage": "Change language",
+  "lightMode": "Light Mode",
+  "darkMode": "Dark Mode",
+  "about": "About",
+  "about.subHeader": "Author: Zlatko Damijanić",
+  "about.message": "High Vocational School, Samobor | www.strukovnasamobor.hr"
+}

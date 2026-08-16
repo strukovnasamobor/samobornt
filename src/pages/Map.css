@@ -1,0 +1,20 @@
+/* Map has no fixed header, so the scroll container starts at the very top */
+.ion-page.map-page > ion-header {
+  display: none;
+}
+
+#map-ioncontent::part(scroll) {
+  top: 0px;
+}
+
+.map.center {
+    height: auto;
+    margin: 0;
+    align-self: stretch;
+}
+
+.map iframe {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-height: 0;
+}

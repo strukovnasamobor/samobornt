@@ -1,14 +1,73 @@
 body {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+  /* Prevent history back and forward on swipe */
+  overscroll-behavior-x: none; /* Prevent left/right overscroll chaining */
+  touch-action: pan-y; /* Allow only vertical scrolling */
+  user-select: none; /* Prevent text selection */
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE/Edge */
+  color-scheme: none;
+  font-family: sans-serif;
 }
 
-#root {
+ion-tab-bar {
+  height: 49.2px;
+}
+
+ion-tab-button {
+  max-width: none;
+}
+
+.tab-selected{
+  background: var(--ion-tab-bar-background-selected);
+}
+
+ion-content::part(scroll) {
+  top: 50px;
+}
+
+.full-screen {
+  height: 100%;
+}
+
+.main {
+  display: flex;
+  min-height: 100%;
+  background-color: var(--main-background-color);
+}
+
+.main > div {
+  width: 100%;
+}
+
+.center {
+  margin: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.alert-wrapper {
+  background-color: white !important;
+}
+
+body.dark .alert-wrapper {
+  background-color: black !important;
+}
+
+/* Large devices */
+@media (min-width: 1200px) {
+  ion-tab-bar {
+    display: none !important;
+  }
+
+  ion-content::part(scroll) {
+    overflow: auto;
+    top: 0px;
+  }
+
+  .main {
+    min-height: calc(100% - 50px);
+    height: fit-content;
+  }
 }

@@ -8,13 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
-      includeAssets: [
-        "icons/icon-192.png",
-        "icons/icon-512.png",
-        "icons/icon-512-maskable.png",
-        "i18n/en.json",
-        "i18n/hr.json",
-      ],
+      includeAssets: ["**/*"],
       manifest: {
         id: "com.strukovnasamobor.samobornt",
         name: "Samobor N&T",

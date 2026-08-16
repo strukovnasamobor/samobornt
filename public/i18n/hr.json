@@ -1,0 +1,23 @@
+{
+  "tabs": {
+    "map": "Karta",
+    "sights": "Znamenitosti",
+    "settings": "Postavke"
+  },
+  "navigation": {
+    "map": "KARTA",
+    "sights": "ZNAMENITOSTI",
+    "settings": "POSTAVKE"
+  },
+  "alert": "Upozorenje",
+  "ok": "U redu",
+  "close": "Zatvori",
+  "loading": "Učitavanje...",
+  "reset": "Resetiraj",
+  "changeLanguage": "Promijeni jezik",
+  "lightMode": "Svijetli način",
+  "darkMode": "Tamni način",
+  "about": "O aplikaciji",
+  "about.subHeader": "Autor: Zlatko Damijanić",
+  "about.message": "Srednja strukovna škola, Samobor | www.strukovnasamobor.hr"
+}
