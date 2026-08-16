@@ -1,5 +1,6 @@
-- automatic adding route and offline map when there is no internet connection
 - functionalities from samobornt-web/android i samobornt-ar
+    - adding cards in sights
+    - adding search in header in sights
 
 - making android-capacitor
 - publish on Google Play

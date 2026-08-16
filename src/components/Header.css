@@ -133,10 +133,6 @@ ion-header ion-searchbar.searchbar-has-value .searchbar-input {
 
 /* 	Medium devices */
 @media (max-width: 768px) {
-    ion-header .header-title {
-        display: none;
-    }
-
     ion-header .header-search {
         width: 100%;
     }   

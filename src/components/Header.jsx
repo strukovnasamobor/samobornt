@@ -44,7 +44,7 @@ export default function Header() {
           </IonButton>
         </IonButtons>
       </div>
-      <div className="header-title ion-hide-xl-up">SS VIEWER</div>
+      <div className="header-title ion-hide-xl-up">SAMOBOR N&T</div>
     </IonHeader>
   );
 }
