@@ -1,4 +1,9 @@
-/* Sights is the only page that hides the header title */
-.sights-page ion-header .header-title {
-  display: none;
+@media (max-width: 768px) {
+    .sights-page ion-header .header-title {
+        display: none;
+    }
+
+    .sights-page ion-header .header-title {
+        width: 100%;
+    } 
 }
