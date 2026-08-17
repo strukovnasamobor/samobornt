@@ -1,28 +1,17 @@
 import "./Header.css";
-import { IonHeader, IonButtons, IonButton } from "@ionic/react";
-import { Route } from 'react-router';
-import { useLocation } from "react-router-dom";
+import { IonHeader, IonButtons, IonButton, useIonRouter } from "@ionic/react";
 import { useTranslation } from "react-i18next";
-import { useIonRouter } from "@ionic/react";
 
 export default function Header() {
   const router = useIonRouter();
   const { t } = useTranslation();
-  const location = useLocation();
 
   const handleMapNavClick = () => {
-    router.push("/", "forward");
+    router.push("/map", "forward");
   };
 
   const handleSightsNavClick = () => {
-    let currentParamId = "";
-    if (location.pathname.startsWith("/sights")) {
-      const searchParams = new URLSearchParams(location.search);
-      currentParamId = searchParams.get("id");
-    }
-
-    let targetUrl = "/sights";
-    router.push(targetUrl, "forward");
+    router.push("/sights", "forward");
   };
 
   const handleSettingsNavClick = () => {
