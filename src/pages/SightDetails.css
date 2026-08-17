@@ -10,6 +10,7 @@
     /* the page runs full width, so cap the hero rather than let a wide window
        turn 4:3 into a screen-and-a-half of photo — object-fit crops instead */
     max-height: 65vh;
+    cursor: zoom-in;
 }
 
 .sight-details-gallery .swiper-button-next,

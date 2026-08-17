@@ -1,17 +1,13 @@
 import "./SightDetails.css";
 import PageLayout from "../components/PageLayout";
 import {
-  IonButton,
-  IonButtons,
   IonCol,
   IonGrid,
-  IonIcon,
   IonRow,
   IonText,
   useIonRouter,
 } from "@ionic/react";
-import { arrowBackOutline } from "ionicons/icons";
-import { useContext } from "react";
+import { useContext, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSwipeable } from "react-swipeable";
@@ -21,6 +17,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { AppContext } from "../AppContext";
+import ImageViewer from "../components/ImageViewer";
 import Loading from "../components/Loading";
 import PageNotFound from "./PageNotFound";
 import localized from "../utils/localized";
@@ -28,9 +25,13 @@ import imageUrls from "../utils/imageUrls";
 
 export default function SightDetails() {
   const { sights } = useContext(AppContext);
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const router = useIonRouter();
   const { id } = useParams();
+
+  // index of the image shown in the fullscreen viewer, null while it is closed
+  const [viewerIndex, setViewerIndex] = useState(null);
+  const galleryRef = useRef(null);
 
   const index = sights ? sights.findIndex((sight) => sight.id === id) : -1;
   const sight = index === -1 ? null : sights[index];
@@ -48,6 +49,13 @@ export default function SightDetails() {
     trackMouse: true,
   });
 
+  // Swiper suppresses the click that ends a swipe, so this only fires on a real
+  // tap; the arrows and bullets are their own controls and shouldn't open it.
+  const openViewer = (e) => {
+    if (e.target.closest(".swiper-button-next, .swiper-button-prev, .swiper-pagination")) return;
+    setViewerIndex(galleryRef.current?.realIndex ?? 0);
+  };
+
   if (sights === null) {
     return <Loading />;
   }
@@ -64,21 +72,24 @@ export default function SightDetails() {
   return (
     <PageLayout name="sight-details" center={false}>
       {images.length > 0 && (
-        <Swiper
-          modules={[Navigation, Pagination]}
-          slidesPerView={1}
-          spaceBetween={10}
-          navigation
-          pagination={{ clickable: true, dynamicBullets: true }}
-          loop={images.length > 1}
-          className="sight-details-gallery"
-        >
-          {images.map((url, imageIndex) => (
-            <SwiperSlide key={url + imageIndex}>
-              <img src={url} alt={`${name} ${imageIndex + 1}`} />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        <div onClick={openViewer}>
+          <Swiper
+            modules={[Navigation, Pagination]}
+            onSwiper={(swiper) => { galleryRef.current = swiper; }}
+            slidesPerView={1}
+            spaceBetween={10}
+            navigation
+            pagination={{ clickable: true, dynamicBullets: true }}
+            loop={images.length > 1}
+            className="sight-details-gallery"
+          >
+            {images.map((url, imageIndex) => (
+              <SwiperSlide key={url + imageIndex}>
+                <img src={url} alt={`${name} ${imageIndex + 1}`} draggable={false} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
       )}
 
       <IonGrid className="full-width" {...swipeHandlers}>
@@ -98,6 +109,16 @@ export default function SightDetails() {
           </IonCol>
         </IonRow>
       </IonGrid>
+
+      {images.length > 0 && (
+        <ImageViewer
+          images={images}
+          isOpen={viewerIndex !== null}
+          startIndex={viewerIndex ?? 0}
+          title={title}
+          onClose={() => setViewerIndex(null)}
+        />
+      )}
     </PageLayout>
   );
 }
