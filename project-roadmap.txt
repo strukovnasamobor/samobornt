@@ -1,7 +1,8 @@
 - adding cards in sights
 - adding search in header in sights
 - click on card opening card detail
-- in card detail add show on map and open ar
+- in card detail add show on map, dynamic set not by link
+- in card detail add show on open ar
 - click on marker opening card detail
 - click on image open image fullscreen zoomable view
 - settings tab - ligh/dark/mode, language, about, privacy_policy, source code
