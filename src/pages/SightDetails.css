@@ -1,0 +1,40 @@
+.sight-details-back {
+    padding: 8px 4px 0;
+}
+
+.sight-details-gallery {
+    width: 100%;
+}
+
+.sight-details-gallery img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.sight-details-gallery .swiper-button-next,
+.sight-details-gallery .swiper-button-prev,
+.sight-details-gallery .swiper-pagination-bullet-active {
+    color: var(--ion-color-primary-contrast);
+    --swiper-pagination-color: var(--ion-color-primary-contrast);
+}
+
+.sight-details-description {
+    white-space: pre-line;
+    line-height: 1.6;
+    text-align: left;
+}
+
+@media (min-width: 1200px) {
+    .sight-details {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .sight-details-page ion-header .header-title {
+        display: none;
+    }
+}

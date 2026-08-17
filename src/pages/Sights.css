@@ -1,3 +1,27 @@
+.sight-card {
+    height: 100%;
+    margin-inline: 0;
+    background: var(--ion-card-background);
+}
+
+.sight-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.sight-card ion-card-title {
+    color: var(--ion-card-title-color);
+}
+
+/* material design uppercases subtitles; the sight title is a full sentence */
+.sight-card ion-card-subtitle {
+    margin-top: 4px;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
 @media (max-width: 768px) {
     .sights-page ion-header .header-title {
         display: none;
@@ -5,5 +29,5 @@
 
     .sights-page ion-header .header-title {
         width: 100%;
-    } 
+    }
 }

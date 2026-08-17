@@ -1,0 +1,16 @@
+.settings-list {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 8px;
+    background: transparent;
+}
+
+.settings-list ion-item {
+    --background: transparent;
+}
+
+.settings-theme-segment {
+    width: 100%;
+    margin: 8px 0;
+}

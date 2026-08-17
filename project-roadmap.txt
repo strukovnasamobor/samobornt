@@ -1,11 +1,13 @@
-- adding cards in sights
+- multiple images on cards in Sights
+- sights/name_hr or en
+- click on marker on the map opening card detail
+- click on image in CardDetails open image fullscreen zoomable view
+- diffrent map collection depending on selected language
 - adding search in header in sights
-- click on card opening card detail
-- in card detail add show on map, dynamic set not by link
-- in card detail add show on open ar
-- click on marker opening card detail
-- click on image open image fullscreen zoomable view
-- settings tab - ligh/dark/mode, language, about, privacy_policy, source code
+- in card detail add show on map, dynamic set map camera not by link
+- in card detail add open ar
+- settings tab - ligh/dark/mode, selectedLanguage, privacy_policy, source code, about
+- delete unused files and translation
 
 - making android-capacitor
 - publish on Google Play

@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 
 import Map from "./pages/Map";
 import Sights from "./pages/Sights";
+import SightDetails from "./pages/SightDetails";
 import Settings from "./pages/Settings";
 import PageNotFound from "./pages/PageNotFound";
 
@@ -56,6 +57,7 @@ export default function App() {
       <IonRouterOutlet>
         <Route exact path="/" component={Map} />
         <Route exact path="/sights" component={Sights} />
+        <Route exact path="/sights/:id" component={SightDetails} />
         <Route exact path="/settings" component={Settings} />
         <Route component={PageNotFound} />
       </IonRouterOutlet>

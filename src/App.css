@@ -29,6 +29,10 @@ ion-content::part(scroll) {
   height: 100%;
 }
 
+.full-width {
+  width: 100%;
+}
+
 .main {
   display: flex;
   min-height: 100%;

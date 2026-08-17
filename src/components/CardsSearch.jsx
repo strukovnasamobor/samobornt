@@ -1,22 +1,18 @@
-import { useContext } from 'react';
-import { Context } from '../App';
-import { IonSearchbar } from '@ionic/react';
-import { t } from 'i18next';
+import { useContext } from "react";
+import { IonSearchbar } from "@ionic/react";
+import { useTranslation } from "react-i18next";
+import { AppContext } from "../AppContext";
 
-const CardsSearch = () => {
-    const { cardsSearchInput, setCardsSearchInput } = useContext(Context);
+export default function CardsSearch() {
+  const { sightsSearchInput, setSightsSearchInput } = useContext(AppContext);
+  const { t } = useTranslation();
 
-    const handleSearchInput = (e) => {
-        setCardsSearchInput(e.target.value);
-    };
-
-    return (
-        <IonSearchbar
-            debounce={1000}
-            onIonInput={(e) => handleSearchInput(e)}
-            value={cardsSearchInput}
-            placeholder={t("search")}
-        ></IonSearchbar>    );
-};
-
-export default CardsSearch;
+  return (
+    <IonSearchbar
+      debounce={300}
+      value={sightsSearchInput}
+      onIonInput={(e) => setSightsSearchInput(e.target.value ?? "")}
+      placeholder={t("search")}
+    />
+  );
+}

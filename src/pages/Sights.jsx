@@ -1,79 +1,78 @@
-
 import "./Sights.css";
 import PageLayout from "../components/PageLayout";
 import {
   IonCard,
   IonCardContent,
   IonCardHeader,
+  IonCardSubtitle,
   IonCardTitle,
   IonCol,
   IonGrid,
-  IonPage,
-  IonRow
-} from '@ionic/react';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { useContext, useEffect } from 'react';
-import { db } from '../../firebase';
-import CardsSearch from './../components/CardsSearch';
-import { Context } from '../App';
-import Loading from '../components/Loading';
+  IonRow,
+  IonText,
+} from "@ionic/react";
+import { useContext } from "react";
+import { useTranslation } from "react-i18next";
+import { AppContext } from "../AppContext";
+import CardsSearch from "../components/CardsSearch";
+import Loading from "../components/Loading";
+import localized from "../utils/localized";
+import imageUrls from "../utils/imageUrls";
 
 export default function Sights() {
-  const { cardsData, setCardsData, cardsSearchInput, t, selectedLanguage, setDatabaseLanguage } = useContext(Context);
+  const { sights, sightsSearchInput } = useContext(AppContext);
+  const { t, i18n } = useTranslation();
 
-  useEffect(() => {    
-      const unsubCollectionCards = onSnapshot(collection(db, "sights_" + selectedLanguage), (collection) => {
-        const data = [];
-        collection.forEach((doc) => {
-          data[doc.id] = {
-            id: doc.id,
-            ...doc.data()
-          };
-        });
-        console.log("Cards > data =", data);
-        setCardsData(data);
-        setDatabaseLanguage(selectedLanguage);
-      });
-      return () => {
-        unsubCollectionCards();
-      }
-  }, [selectedLanguage]);
-
-  if (cardsData.length == 0) {
-    return (
-      <Loading />
-    );
+  if (sights === null) {
+    return <Loading />;
   }
+
+  const search = sightsSearchInput.trim().toLowerCase();
+  const visibleSights = search
+    ? sights.filter((sight) =>
+        [sight.name, sight.title, sight.shortDescription, sight.longDescription]
+          .map((field) => localized(field, i18n.language).toLowerCase())
+          .some((text) => text.includes(search))
+      )
+    : sights;
 
   return (
     <PageLayout name="sights" center={true}>
-      <IonRow className="center">
-        <IonCol size="6" className="ion-text-start ion-hide-lg-down">
-          <CardsSearch />
-        </IonCol>
-      </IonRow>
       <IonGrid className="full-width">
         <IonRow>
-          {
-            Object.entries(cardsData)
-              ?.filter(([cardId, card]) =>
-                card.name.toLowerCase().includes(cardsSearchInput.toLowerCase()) ||
-                card.longDescription.toLowerCase().includes(cardsSearchInput.toLowerCase())
-              )
-              .map(([cardId, card]) => (
-                <IonCol key={cardId} size="12" size-lg="6">
-                  <IonCard routerLink={"/card/" + cardId}>
-                    <img src={card.imgUrl[0]} alt={card.name} />
-                    <IonCardHeader>
-                      <IonCardTitle>{card.name}</IonCardTitle>
-                    </IonCardHeader>
-                    <IonCardContent>{card.shortDescription}</IonCardContent>
-                  </IonCard>
-                </IonCol>
-              ))
-          }
+          <IonCol size="12" size-lg="8" offset-lg="2">
+            <CardsSearch />
+          </IonCol>
         </IonRow>
+
+        <IonRow>
+          {visibleSights.map((sight) => {
+            const name = localized(sight.name, i18n.language);
+            const title = localized(sight.title, i18n.language);
+            const [coverImage] = imageUrls(sight.imgUrl);
+
+            return (
+              <IonCol key={sight.id} size="12" size-md="6" size-xl="4">
+                <IonCard className="sight-card" routerLink={"/sights/" + sight.id}>
+                  {coverImage && <img src={coverImage} alt={name} />}
+                  <IonCardHeader>
+                    <IonCardTitle>{title}</IonCardTitle>
+                  </IonCardHeader>
+                  <IonCardContent>{localized(sight.shortDescription, i18n.language)}</IonCardContent>
+                </IonCard>
+              </IonCol>
+            );
+          })}
+        </IonRow>
+
+        {visibleSights.length === 0 && (
+          <IonRow className="ion-text-center">
+            <IonCol>
+              <IonText>{search ? t("noResults") : t("noSights")}</IonText>
+            </IonCol>
+          </IonRow>
+        )}
       </IonGrid>
     </PageLayout>
   );
-};
+}
