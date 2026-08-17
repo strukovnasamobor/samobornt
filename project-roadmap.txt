@@ -1,8 +1,9 @@
-- multiple images on cards in Sights, dark mode
-- click on marker on the map opening card detail
 - click on image in CardDetails open image fullscreen zoomable view
-- diffrent map collection depending on selected language
+- sights dark mode
 - adding search in header in sights
+- click on marker on the map opening card detail
+- diffrent map collection depending on selected language, new free path
+
 - in card detail add show on map, dynamic set map camera not by link
 - in card detail add open ar
 - settings tab - ligh/dark/mode, selectedLanguage, privacy_policy, source code, about

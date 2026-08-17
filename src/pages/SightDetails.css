@@ -1,7 +1,3 @@
-.sight-details-back {
-    padding: 8px 4px 0;
-}
-
 .sight-details-gallery {
     width: 100%;
 }
@@ -11,6 +7,9 @@
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: cover;
+    /* the page runs full width, so cap the hero rather than let a wide window
+       turn 4:3 into a screen-and-a-half of photo — object-fit crops instead */
+    max-height: 65vh;
 }
 
 .sight-details-gallery .swiper-button-next,
@@ -24,13 +23,6 @@
     white-space: pre-line;
     line-height: 1.6;
     text-align: left;
-}
-
-@media (min-width: 1200px) {
-    .sight-details {
-        max-width: 900px;
-        margin: 0 auto;
-    }
 }
 
 @media (max-width: 768px) {

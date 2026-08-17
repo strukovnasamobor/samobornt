@@ -1,3 +1,7 @@
+.sights ion-grid {
+    padding-bottom: 15px;
+}
+
 .sight-card {
     height: 100%;
     margin-inline: 0;
@@ -9,6 +13,32 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
+    /* the whole card is a link — don't let a drag start a native image drag */
+    -webkit-user-drag: none;
+}
+
+.sight-card-gallery {
+    width: 100%;
+    /* arrows and bullets sit on top of the photo */
+    --swiper-navigation-size: 22px;
+    --swiper-navigation-color: #ffffff;
+    --swiper-pagination-color: #ffffff;
+    --swiper-pagination-bullet-inactive-color: #ffffff;
+    --swiper-pagination-bullet-inactive-opacity: 0.55;
+}
+
+/* taps on the bullets should still open the sight, so let them fall through */
+.sight-card-gallery .swiper-pagination {
+    pointer-events: none;
+}
+
+.sight-card-gallery .swiper-pagination-bullet {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.sight-card-gallery .swiper-button-next,
+.sight-card-gallery .swiper-button-prev {
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.7));
 }
 
 .sight-card ion-card-title {

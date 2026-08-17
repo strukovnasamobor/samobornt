@@ -4,7 +4,6 @@ import {
   IonCard,
   IonCardContent,
   IonCardHeader,
-  IonCardSubtitle,
   IonCardTitle,
   IonCol,
   IonGrid,
@@ -13,11 +12,27 @@ import {
 } from "@ionic/react";
 import { useContext } from "react";
 import { useTranslation } from "react-i18next";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import { AppContext } from "../AppContext";
 import CardsSearch from "../components/CardsSearch";
 import Loading from "../components/Loading";
 import localized from "../utils/localized";
 import imageUrls from "../utils/imageUrls";
+
+// The gallery arrows sit inside the card, which is itself a router link. Ionic
+// binds routerLink as a React onClick on ion-card, and React runs handlers from
+// the target upwards, so stopping propagation here keeps an arrow tap on the
+// gallery instead of opening the sight. Taps on the photo still navigate.
+const keepArrowTapsInGallery = (e) => {
+  if (e.target.closest(".swiper-button-next, .swiper-button-prev")) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+};
 
 export default function Sights() {
   const { sights, sightsSearchInput } = useContext(AppContext);
@@ -37,7 +52,7 @@ export default function Sights() {
     : sights;
 
   return (
-    <PageLayout name="sights" center={true}>
+    <PageLayout name="sights" center={false}>
       <IonGrid className="full-width">
         <IonRow>
           <IonCol size="12" size-lg="8" offset-lg="2">
@@ -49,12 +64,34 @@ export default function Sights() {
           {visibleSights.map((sight) => {
             const name = localized(sight.name, i18n.language);
             const title = localized(sight.title, i18n.language);
-            const [coverImage] = imageUrls(sight.imgUrl);
+            const images = imageUrls(sight.imgUrl);
 
             return (
               <IonCol key={sight.id} size="12" size-md="6" size-xl="4">
                 <IonCard className="sight-card" routerLink={"/sights/" + sight.id}>
-                  {coverImage && <img src={coverImage} alt={name} />}
+                  {images.length > 0 && (
+                    <div onClick={keepArrowTapsInGallery}>
+                      <Swiper
+                        modules={[Navigation, Pagination]}
+                        slidesPerView={1}
+                        navigation={images.length > 1}
+                        pagination={images.length > 1}
+                        loop={images.length > 1}
+                        className="sight-card-gallery"
+                      >
+                        {images.map((url, imageIndex) => (
+                          <SwiperSlide key={url + imageIndex}>
+                            <img
+                              src={url}
+                              alt={`${name} ${imageIndex + 1}`}
+                              loading="lazy"
+                              draggable={false}
+                            />
+                          </SwiperSlide>
+                        ))}
+                      </Swiper>
+                    </div>
+                  )}
                   <IonCardHeader>
                     <IonCardTitle>{title}</IonCardTitle>
                   </IonCardHeader>
