@@ -81,11 +81,19 @@ export default function SightDetails() {
             navigation
             pagination={{ clickable: true, dynamicBullets: true }}
             loop={images.length > 1}
+            // the photo sets its own height now, so let the gallery follow it
+            autoHeight={true}
             className="sight-details-gallery"
           >
             {images.map((url, imageIndex) => (
               <SwiperSlide key={url + imageIndex}>
-                <img src={url} alt={`${name} ${imageIndex + 1}`} draggable={false} />
+                <img
+                  src={url}
+                  alt={`${name} ${imageIndex + 1}`}
+                  draggable={false}
+                  // autoHeight measures on init, before the image has a height
+                  onLoad={() => galleryRef.current?.update()}
+                />
               </SwiperSlide>
             ))}
           </Swiper>

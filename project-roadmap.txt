@@ -1,7 +1,6 @@
-- click on image in CardDetails open image fullscreen zoomable view
-- sights dark mode
+- ImageView design - in place zoom in
 - adding search in header in sights
-- click on marker on the map opening card detail
+- click on marker (id from description) on the map opening card detail
 - diffrent map collection depending on selected language, new free path
 
 - in card detail add show on map, dynamic set map camera not by link

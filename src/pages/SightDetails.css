@@ -1,23 +1,57 @@
 .sight-details-gallery {
     width: 100%;
+    /* the fill beside the photo is inverted against the page: black in light
+       mode, white in dark. --gallery-on-fill is whatever reads on top of it. */
+    --gallery-fill: #000000;
+    --gallery-on-fill: #ffffff;
+
+    background: var(--gallery-fill);
+    --swiper-navigation-color: var(--gallery-on-fill);
+    --swiper-pagination-color: var(--gallery-on-fill);
+    --swiper-pagination-bullet-inactive-color: var(--gallery-on-fill);
+}
+
+body.dark .sight-details-gallery {
+    --gallery-fill: #ffffff;
+    --gallery-on-fill: #000000;
+}
+
+.sight-details-gallery .swiper-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .sight-details-gallery img {
     display: block;
+    /* Grow across the full width, but stop once the photo would be taller than
+       what is actually on screen: the viewport less the 50px header and the
+       49.2px tab bar (both from App.css). Past that the box stops growing and
+       object-fit shrinks the photo inside it, so the fill shows at the sides.
+       dvh tracks a collapsing mobile URL bar; the vh line covers browsers
+       without it, which is why the property is declared twice. */
     width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    /* the page runs full width, so cap the hero rather than let a wide window
-       turn 4:3 into a screen-and-a-half of photo — object-fit crops instead */
-    max-height: 65vh;
+    height: auto;
+    max-height: calc(100vh - 50px - 49.2px);
+    max-height: calc(100dvh - 50px - 49.2px);
+    object-fit: contain;
     cursor: zoom-in;
 }
 
+/* App.css hides the tab bar from this width up, so that height comes back */
+@media (min-width: 1200px) {
+    .sight-details-gallery img {
+        max-height: calc(100vh - 50px);
+        max-height: calc(100dvh - 50px);
+    }
+}
+
+/* the controls cross both the photo and the filled bars, so give them a halo in
+   the fill colour instead of relying on whatever is behind them */
 .sight-details-gallery .swiper-button-next,
 .sight-details-gallery .swiper-button-prev,
-.sight-details-gallery .swiper-pagination-bullet-active {
-    color: var(--ion-color-primary-contrast);
-    --swiper-pagination-color: var(--ion-color-primary-contrast);
+.sight-details-gallery .swiper-pagination-bullet {
+    filter: drop-shadow(0 0 3px var(--gallery-fill));
 }
 
 .sight-details-description {
