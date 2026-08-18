@@ -1,5 +1,3 @@
-- different feature collection id depending on selected language
-
 - add show on map below title, dynamic set map camera not by link
 - add open ar below title, ?ArViewer
 - settings tab - ligh/dark/mode, selectedLanguage, about with web link and buttons privacy_policy, source, OK 

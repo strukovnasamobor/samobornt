@@ -2,12 +2,24 @@ import "./Map.css";
 import PageLayout from "../components/PageLayout";
 import { useIonRouter } from "@ionic/react";
 import { useContext, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { AppContext } from "../AppContext";
 
 // Origin of the embedded map — also the only origin whose messages we accept.
 // Point both at http://localhost:5173 to test against a local rontomap build.
 const RONTOMAP_ORIGIN = "https://rontomap.web.app";
-const RONTOMAP_SRC = `${RONTOMAP_ORIGIN}/?lat=45.799686&long=15.706353&zoom=14.73&bearing=-96.8&pitch=0.0&features_collection=0x3Glib9fg1VivuDX6gR&embedded=true&style=rontomap_streets_light&geolocation=true&interact=true`;
+
+// One feature collection per language, so the markers come back localised.
+// Falls back to english, matching i18n's own fallbackLng.
+const FEATURE_COLLECTIONS = {
+  en: "ZNGsrqPj8bDcUIsozvTk",
+  hr: "0x3Glib9fg1VivuDX6gR",
+};
+
+const rontomapSrc = (language) =>
+  `${RONTOMAP_ORIGIN}/?lat=45.799686&long=15.706353&zoom=14.73&bearing=-96.8&pitch=0.0` +
+  `&features_collection=${FEATURE_COLLECTIONS[language] ?? FEATURE_COLLECTIONS.en}` +
+  `&embedded=true&style=rontomap_streets_light&geolocation=true&interact=true`;
 
 /**
  * A marker carries its sight id as JSON in the description field. That can
@@ -41,6 +53,11 @@ function sightIdFromMarker(marker) {
 export default function Map() {
   const { sights } = useContext(AppContext);
   const router = useIonRouter();
+  const { i18n } = useTranslation();
+
+  // resolvedLanguage is the supported code i18next settled on ("en"/"hr"),
+  // rather than whatever region-tagged value the detector reported
+  const language = i18n.resolvedLanguage ?? i18n.language;
 
   // Marker clicks inside the iframe arrive as postMessage from rontomap
   useEffect(() => {
@@ -72,11 +89,14 @@ export default function Map() {
   return (
     <PageLayout name="map" center={true}>
       <iframe
+        // keying on the language remounts the frame on a switch; changing src
+        // in place would navigate the existing frame and stack up history
+        key={language}
         title="Rontomap"
         style={{ width: "100%", height: "100%", border: "none" }}
         allow="fullscreen; geolocation"
         scrolling="no"
-        src={RONTOMAP_SRC}
+        src={rontomapSrc(language)}
       />
     </PageLayout>
   );
