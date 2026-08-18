@@ -11,6 +11,7 @@
   },
   "alert": "Upozorenje",
   "search": "Pretraži",
+  "searchSights": "Pretraži znamenitosti",
   "noResults": "Nema znamenitosti koje odgovaraju pretrazi.",
   "noSights": "Još nema znamenitosti za prikaz.",
   "ok": "U redu",
@@ -24,6 +25,6 @@
   "dark": "Tamno",
   "system": "Sustav",
   "about": "O aplikaciji",
-  "about.subHeader": "Autor: Zlatko Damijanić",
+  "about.subHeader": "Autor: Zlatko Damijanić, Ideja: Ekonomska",
   "about.message": "Srednja strukovna škola, Samobor | www.strukovnasamobor.hr"
 }

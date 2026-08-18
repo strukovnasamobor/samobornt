@@ -18,7 +18,6 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { AppContext } from "../AppContext";
-import CardsSearch from "../components/CardsSearch";
 import Loading from "../components/Loading";
 import localized from "../utils/localized";
 import imageUrls from "../utils/imageUrls";
@@ -54,12 +53,6 @@ export default function Sights() {
   return (
     <PageLayout name="sights" center={false}>
       <IonGrid className="full-width">
-        <IonRow>
-          <IonCol size="12" size-lg="8" offset-lg="2">
-            <CardsSearch />
-          </IonCol>
-        </IonRow>
-
         <IonRow>
           {visibleSights.map((sight) => {
             const name = localized(sight.name, i18n.language);

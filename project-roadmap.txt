@@ -1,11 +1,9 @@
-- adding search in header in sights
 - click on marker (id from json in description) on the map opening card detail, new locations in database
 - different map collection depending on selected language, new free path
 
 - add show on map below title, dynamic set map camera not by link
-- add open ar below title
+- add open ar below title, ?ArViewer
 - settings tab - ligh/dark/mode, selectedLanguage, privacy_policy, web link, source code, about
-- delete unused files (?ArViewer) and translation
 
 - making android-capacitor
 - publish on Google Play

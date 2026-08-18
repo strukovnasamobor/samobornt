@@ -1,6 +1,8 @@
 import "./Header.css";
 import { IonHeader, IonButtons, IonButton, useIonRouter } from "@ionic/react";
+import { Route, Switch } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import SightsSearch from './SightsSearch';
 
 export default function Header() {
   const router = useIonRouter();
@@ -34,6 +36,15 @@ export default function Header() {
         </IonButtons>
       </div>
       <div className="header-title ion-hide-xl-up">SAMOBOR N&T</div>
+      <div className="header-icons">
+        <Switch>
+          <Route exact path={["/sights", "/sights/:id"]}>
+            <div className="header-search">
+              <SightsSearch/>
+            </div>
+          </Route>
+        </Switch>
+      </div>
     </IonHeader>
   );
 }
