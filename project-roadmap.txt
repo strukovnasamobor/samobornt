@@ -2,9 +2,9 @@
 - click on marker (id from json in description) on the map opening card detail, new locations in database
 - different map collection depending on selected language, new free path
 
-- add show on map, dynamic set map camera not by link
-- add open ar
-- settings tab - ligh/dark/mode, selectedLanguage, privacy_policy, source code, about
+- add show on map below title, dynamic set map camera not by link
+- add open ar below title
+- settings tab - ligh/dark/mode, selectedLanguage, privacy_policy, web link, source code, about
 - delete unused files (?ArViewer) and translation
 
 - making android-capacitor

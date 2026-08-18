@@ -44,6 +44,11 @@ export default function SightDetails() {
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => goToSight(1),
     onSwipedRight: () => goToSight(-1),
+    // react-swipeable defaults to delta 10 with no time limit, so a 10px drag
+    // — or any small mouse drag, since trackMouse is on — jumped to another
+    // sight. Ask for a deliberate flick instead.
+    delta: 100,
+    swipeDuration: 500,
     trackMouse: true,
   });
 
@@ -76,6 +81,11 @@ export default function SightDetails() {
           onSwiper={(swiper) => { galleryRef.current = swiper; }}
           slidesPerView={1}
           spaceBetween={10}
+          // swiper starts following the finger after 5px and treats anything
+          // within 45 degrees as horizontal; both are widened so a scroll or a
+          // nudge does not drag the gallery
+          threshold={20}
+          touchAngle={30}
           navigation
           pagination={{ clickable: true, dynamicBullets: true }}
           loop={images.length > 1}
