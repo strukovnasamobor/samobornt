@@ -1,4 +1,5 @@
-- new free path, click on marker (id from json in description) on the map opening card detail, new sights coords in database
+- click on marker (id from json in description) on the map opening card detail
+- finishing database data
 - different map collection depending on selected language
 
 - add show on map below title, dynamic set map camera not by link
