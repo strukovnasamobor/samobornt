@@ -1,5 +1,4 @@
-- finishing database data
-- different map collection depending on selected language
+- different feature collection id depending on selected language
 
 - add show on map below title, dynamic set map camera not by link
 - add open ar below title, ?ArViewer
