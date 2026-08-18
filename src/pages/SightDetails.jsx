@@ -7,17 +7,17 @@ import {
   IonText,
   useIonRouter,
 } from "@ionic/react";
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSwipeable } from "react-swipeable";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
+import { Navigation, Pagination, Zoom } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import "swiper/css/zoom";
 import { AppContext } from "../AppContext";
-import ImageViewer from "../components/ImageViewer";
 import Loading from "../components/Loading";
 import PageNotFound from "./PageNotFound";
 import localized from "../utils/localized";
@@ -29,8 +29,6 @@ export default function SightDetails() {
   const router = useIonRouter();
   const { id } = useParams();
 
-  // index of the image shown in the fullscreen viewer, null while it is closed
-  const [viewerIndex, setViewerIndex] = useState(null);
   const galleryRef = useRef(null);
 
   const index = sights ? sights.findIndex((sight) => sight.id === id) : -1;
@@ -49,11 +47,12 @@ export default function SightDetails() {
     trackMouse: true,
   });
 
-  // Swiper suppresses the click that ends a swipe, so this only fires on a real
-  // tap; the arrows and bullets are their own controls and shouldn't open it.
-  const openViewer = (e) => {
-    if (e.target.closest(".swiper-button-next, .swiper-button-prev, .swiper-pagination")) return;
-    setViewerIndex(galleryRef.current?.realIndex ?? 0);
+  // Zoom the photo where it sits. Swiper only emits click for a real tap, not
+  // for the end of a drag, so swiping the gallery or panning a zoomed photo
+  // never triggers it; the arrows and bullets are controls in their own right.
+  const handleGalleryClick = (swiper, event) => {
+    if (event.target.closest(".swiper-button-next, .swiper-button-prev, .swiper-pagination")) return;
+    swiper.zoom.toggle(event);
   };
 
   if (sights === null) {
@@ -72,21 +71,26 @@ export default function SightDetails() {
   return (
     <PageLayout name="sight-details" center={false}>
       {images.length > 0 && (
-        <div onClick={openViewer}>
-          <Swiper
-            modules={[Navigation, Pagination]}
-            onSwiper={(swiper) => { galleryRef.current = swiper; }}
-            slidesPerView={1}
-            spaceBetween={10}
-            navigation
-            pagination={{ clickable: true, dynamicBullets: true }}
-            loop={images.length > 1}
-            // the photo sets its own height now, so let the gallery follow it
-            autoHeight={true}
-            className="sight-details-gallery"
-          >
-            {images.map((url, imageIndex) => (
-              <SwiperSlide key={url + imageIndex}>
+        <Swiper
+          modules={[Navigation, Pagination, Zoom]}
+          onSwiper={(swiper) => { galleryRef.current = swiper; }}
+          slidesPerView={1}
+          spaceBetween={10}
+          navigation
+          pagination={{ clickable: true, dynamicBullets: true }}
+          loop={images.length > 1}
+          // the photo sets its own height, so let the gallery follow it
+          autoHeight={true}
+          // toggle:false drops the built-in double-tap; the click below drives
+          // the zoom instead. Two-finger pinch is separate and stays enabled.
+          zoom={{ maxRatio: 4, toggle: false }}
+          onClick={handleGalleryClick}
+          className="sight-details-gallery"
+        >
+          {images.map((url, imageIndex) => (
+            <SwiperSlide key={url + imageIndex}>
+              {/* zoom only drives what sits inside swiper-zoom-container */}
+              <div className="swiper-zoom-container">
                 <img
                   src={url}
                   alt={`${name} ${imageIndex + 1}`}
@@ -94,10 +98,10 @@ export default function SightDetails() {
                   // autoHeight measures on init, before the image has a height
                   onLoad={() => galleryRef.current?.update()}
                 />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
       )}
 
       <IonGrid className="full-width" {...swipeHandlers}>
@@ -117,16 +121,6 @@ export default function SightDetails() {
           </IonCol>
         </IonRow>
       </IonGrid>
-
-      {images.length > 0 && (
-        <ImageViewer
-          images={images}
-          isOpen={viewerIndex !== null}
-          startIndex={viewerIndex ?? 0}
-          title={title}
-          onClose={() => setViewerIndex(null)}
-        />
-      )}
     </PageLayout>
   );
 }

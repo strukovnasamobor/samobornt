@@ -22,7 +22,10 @@ body.dark .sight-details-gallery {
     justify-content: center;
 }
 
-.sight-details-gallery img {
+/* Scoped through .swiper-zoom-container so these beat swiper's own
+   `.swiper-zoom-container > img` rule, which sets max-width/height and
+   object-fit at the same specificity and may land later in the bundle. */
+.sight-details-gallery .swiper-zoom-container img {
     display: block;
     /* Grow across the full width, but stop once the photo would be taller than
        what is actually on screen: the viewport less the 50px header and the
@@ -35,12 +38,17 @@ body.dark .sight-details-gallery {
     max-height: calc(100vh - 50px - 49.2px);
     max-height: calc(100dvh - 50px - 49.2px);
     object-fit: contain;
+    /* click zooms into the spot you pressed, click again returns */
     cursor: zoom-in;
+}
+
+.sight-details-gallery .swiper-slide-zoomed .swiper-zoom-container img {
+    cursor: zoom-out;
 }
 
 /* App.css hides the tab bar from this width up, so that height comes back */
 @media (min-width: 1200px) {
-    .sight-details-gallery img {
+    .sight-details-gallery .swiper-zoom-container img {
         max-height: calc(100vh - 50px);
         max-height: calc(100dvh - 50px);
     }
