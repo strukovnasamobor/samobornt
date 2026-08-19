@@ -1,5 +1,20 @@
+/* The text area is what swipes to the neighbouring sight, so it takes the rest
+   of the page: a short description would otherwise leave a dead strip below it
+   where a swipe does nothing. The content element already stops above the tab
+   bar, so "the rest of the page" needs no arithmetic here. */
+.sight-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.sight-details > ion-grid {
+    flex: 1 1 auto;
+}
+
 .sight-details-gallery {
     width: 100%;
+    /* the photo sets its own height and must not be squeezed by the column */
+    flex: none;
     /* the fill beside the photo is inverted against the page: black in light
        mode, white in dark. --gallery-on-fill is whatever reads on top of it. */
     --gallery-fill: #000000;
