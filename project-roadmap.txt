@@ -1,4 +1,5 @@
 ? on language change bearing, pitch and map style are not preserved
+? orientation change on locked/unlocked orientation
 - faster path loading
 - add open ar below title, ?ArViewer
 - settings tab - ligh/dark/mode, selectedLanguage, about (review hr.json and en.json) with web link and buttons privacy_policy, source, OK 
