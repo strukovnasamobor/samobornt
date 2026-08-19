@@ -9,7 +9,7 @@ import {
   IonText,
   useIonRouter,
 } from "@ionic/react";
-import { navigateOutline } from "ionicons/icons";
+import { cubeOutline, navigateOutline } from "ionicons/icons";
 import { useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -25,6 +25,7 @@ import Loading from "../components/Loading";
 import PageNotFound from "./PageNotFound";
 import localized from "../utils/localized";
 import imageUrls from "../utils/imageUrls";
+import arScene from "../utils/arScene";
 
 export default function SightDetails() {
   const { sights, setMapTarget } = useContext(AppContext);
@@ -75,6 +76,8 @@ export default function SightDetails() {
   const title = localized(sight.title, i18n.language);
   const description = localized(sight.longDescription, i18n.language);
   const images = imageUrls(sight.imgUrl);
+  // only the few sights with a scene of their own get the AR button
+  const scene = arScene(sight);
 
   // Only the id travels: the map holds a marker for each sight and knows where
   // it is, so this page never needs the coordinates. requestedAt makes every
@@ -132,15 +135,29 @@ export default function SightDetails() {
               <h2 className="sight-details-title">{title}</h2>
             </IonText>
 
-            <IonButton
-              className="sight-details-map-button"
-              fill="outline"
-              size="small"
-              onClick={showOnMap}
-            >
-              <IonIcon slot="start" icon={navigateOutline} />
-              {t("showOnMap")}
-            </IonButton>
+            <div className="sight-details-actions">
+              <IonButton
+                className="sight-details-action"
+                fill="outline"
+                size="small"
+                onClick={showOnMap}
+              >
+                <IonIcon slot="start" icon={navigateOutline} />
+                {t("showOnMap")}
+              </IonButton>
+
+              {scene && (
+                <IonButton
+                  className="sight-details-action"
+                  fill="outline"
+                  size="small"
+                  onClick={() => router.push("/ar/" + scene, "forward")}
+                >
+                  <IonIcon slot="start" icon={cubeOutline} />
+                  {t("openAr")}
+                </IonButton>
+              )}
+            </div>
           </IonCol>
         </IonRow>
 

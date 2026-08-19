@@ -1,18 +1,20 @@
-import { IonPage } from '@ionic/react';
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router';
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import Loading from "../components/Loading";
 
-const ARViewer = () => {
-  const arSceneId = useParams()["id"];
-  
+/**
+ * The AR scenes are plain static pages under public/ar, outside the React app,
+ * so this page exists only to hand the browser over to one. replace() rather
+ * than assign() keeps it out of the history: coming back from AR should return
+ * to the sight, not bounce through here and forward again.
+ */
+export default function ArViewer() {
+  const { id } = useParams();
+
   useEffect(() => {
-    window.location.replace('ar/' + arSceneId + '/index.html');
-  }, []);
+    // absolute, so it resolves the same from /ar/:id as from anywhere else
+    window.location.replace("/ar/" + id + "/index.html");
+  }, [id]);
 
-  return (
-    <IonPage className="ion-padding center">
-    </IonPage>
-  );
-};
-
-export default ARViewer;
+  return <Loading />;
+}

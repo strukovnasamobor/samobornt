@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import Map from "./pages/Map";
 import Sights from "./pages/Sights";
 import SightDetails from "./pages/SightDetails";
+import ArViewer from "./pages/ArViewer";
 import Settings from "./pages/Settings";
 import PageNotFound from "./pages/PageNotFound";
 
@@ -30,6 +31,9 @@ export default function App() {
         <Route exact path="/sights" component={Sights} />
         <Route exact path="/sights/:id" component={SightDetails} />
         <Route exact path="/settings" component={Settings} />
+        {/* Not a tab of its own: it hands the browser straight to the static
+            AR page under public/ar, so no tab button points at it. */}
+        <Route exact path="/ar/:id" component={ArViewer} />
         <Route exact path="/">
           <Redirect to="/map" />
         </Route>

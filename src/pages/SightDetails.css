@@ -69,14 +69,23 @@ body.dark .sight-details-gallery {
     margin-bottom: 8px;
 }
 
-.sight-details-map-button {
+/* the buttons sit side by side under the title and wrap onto a second line
+   rather than shrinking when a translation runs long */
+.sight-details-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.sight-details-action {
     margin-top: 0;
     margin-bottom: 0;
 }
 
-/* the primary red goes muddy against the dark page, so the button takes the
+/* the primary red goes muddy against the dark page, so the buttons take the
    lighter tint the palette already names (#b30026) */
-body.dark .sight-details-map-button {
+body.dark .sight-details-action {
     --color: var(--ion-color-primary-tint);
     --border-color: var(--ion-color-primary-tint);
 }
