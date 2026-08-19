@@ -1,1 +1,12 @@
-{ "test": "test" }
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.strukovnasamobor.samobornt",
+      "sha256_cert_fingerprints": [
+        "E9:58:F4:71:B5:9A:F5:04:BD:06:D7:84:94:7B:87:2F:FC:56:26:A7:BF:77:31:80:7A:3E:A0:15:E3:CD:0E:CF"
+      ]
+    }
+  }
+]
