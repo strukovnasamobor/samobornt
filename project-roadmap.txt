@@ -1,4 +1,5 @@
 - fix AR on android-capacitor
+- add other ARs
 - settings tab - ligh/dark/mode, selectedLanguage, about (review hr.json and en.json) with web link and buttons privacy_policy, source, OK 
 
 - publish on Google Play - new description and screenshots
