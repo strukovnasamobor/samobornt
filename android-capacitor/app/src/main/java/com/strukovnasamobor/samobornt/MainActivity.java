@@ -2,14 +2,21 @@ package com.strukovnasamobor.samobornt;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.FrameLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
@@ -33,17 +40,36 @@ public class MainActivity extends BridgeActivity {
             getWindow().setStatusBarContrastEnforced(false);
         }
 
-        // Android 15+ (targetSdk >= 35) forces edge-to-edge. Pad the WebView so it
-        // doesn't draw under system bars; the bar areas then show the activity
-        // theme's window background instead of overlaying our content with a scrim.
+        // Android 15+ (targetSdk >= 35) forces edge-to-edge. Pad the app's own
+        // layout rather than the content root, so the strips behind the system
+        // bars stay clear of the WebView: the navigation bar then shows the
+        // theme's window background, i.e. whatever the system would use anyway.
+        final ViewGroup content = findViewById(android.R.id.content);
+        final View appLayout = content.getChildAt(0);
+
+        // The status bar strip is the one exception, painted in the header's own
+        // colour. It is a view rather than a window attribute because
+        // setStatusBarColor() is ignored from API 35, and windowBackground would
+        // take the navigation bar with it.
+        final View statusBarStrip = new View(this);
+        statusBarStrip.setBackgroundColor(ContextCompat.getColor(this, R.color.statusBar));
+        content.addView(
+            statusBarStrip,
+            new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 0, Gravity.TOP)
+        );
+
         ViewCompat.setOnApplyWindowInsetsListener(
-            findViewById(android.R.id.content),
+            content,
             (v, insets) -> {
                 Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+                appLayout.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+                statusBarStrip.getLayoutParams().height = bars.top;
+                statusBarStrip.requestLayout();
                 return WindowInsetsCompat.CONSUMED;
             }
         );
+
+        applyStatusBarIcons();
 
         // <model-viewer> launches AR by navigating to an intent:// URL for Scene
         // Viewer. Capacitor's own client sends every off-origin navigation to
@@ -95,5 +121,22 @@ public class MainActivity extends BridgeActivity {
                 s, WebSettingsCompat.DARK_STRATEGY_WEB_THEME_DARKENING_ONLY
             );
         }
+    }
+
+    /**
+     * White status bar icons, to read against the dark red strip behind them.
+     * Capacitor's built-in SystemBars plugin sets this from the system theme
+     * when it loads and again on every configuration change, so this has to run
+     * after both - and it only touches the status bar, leaving the navigation
+     * bar's icons to the system.
+     */
+    private void applyStatusBarIcons() {
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightStatusBars(false);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        applyStatusBarIcons();
     }
 }

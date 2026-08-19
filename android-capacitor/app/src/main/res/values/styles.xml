@@ -17,11 +17,10 @@
         <!-- Android 14 and older: the window is not edge-to-edge and the system
              paints the status bar itself, from this attribute. -->
         <item name="android:statusBarColor">@color/statusBar</item>
-        <!-- Android 15+ (targetSdk 36) forces edge-to-edge and ignores the
-             attribute above. MainActivity pads the content by the system-bar
-             insets instead, which leaves those strips showing the window
-             background - so that has to carry the colour there. -->
-        <item name="android:windowBackground">@color/statusBar</item>
+        <!-- Android 15+ (targetSdk 36) ignores the attribute above, so there
+             MainActivity paints the status bar strip itself. windowBackground
+             deliberately stays untouched: it also backs the navigation bar,
+             which is meant to keep the system default. -->
         <!-- keep the clock and icons light against the dark red -->
         <item name="android:windowLightStatusBar">false</item>
     </style>

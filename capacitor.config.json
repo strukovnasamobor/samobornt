@@ -11,10 +11,5 @@
     "allowMixedContent": false,
     "captureInput": true,
     "path": "android-capacitor"
-  },
-  "plugins": {
-    "SystemBars": {
-      "style": "DARK"
-    }
   }
 }
