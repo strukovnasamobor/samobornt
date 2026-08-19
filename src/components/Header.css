@@ -24,7 +24,6 @@ ion-header ion-button:hover {
 }
 
 ion-header .header-title {
-    font-family: arial;
     font-size: 20px;
     width: 100%;
     padding-left: 10px;

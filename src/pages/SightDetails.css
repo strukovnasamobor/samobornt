@@ -62,7 +62,21 @@ body.dark .sight-details-gallery {
     filter: drop-shadow(0 0 3px var(--gallery-fill));
 }
 
+/* the button tucks under the title, so the heading gives up the bottom half
+   of its own margin and the button adds none of its own */
+.sight-details-title {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.sight-details-map-button {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
 .sight-details-description {
+    margin-top: 8px;
+    margin-bottom: 8px;
     white-space: pre-line;
     line-height: 1.6;
     text-align: left;

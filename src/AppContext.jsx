@@ -54,6 +54,11 @@ export function AppContextProvider({ children }) {
   const [sights, setSights] = useState(null);
   const [sightsSearchInput, setSightsSearchInput] = useState("");
 
+  // Where the map tab should point its camera, set by "show on map" in the
+  // sight details. It lives here rather than in the route so the map tab keeps
+  // its single /map entry and Ionic's per-tab history stays intact.
+  const [mapTarget, setMapTarget] = useState(null);
+
   // Every sight document carries all its translations, so a single subscription
   // serves both languages — switching language never refetches.
   useEffect(() => {
@@ -79,6 +84,7 @@ export function AppContextProvider({ children }) {
     <AppContext.Provider value={{
       isDarkMode, themePreference, setThemePreference,
       sights, sightsSearchInput, setSightsSearchInput,
+      mapTarget, setMapTarget,
     }}>
       {children}
     </AppContext.Provider>

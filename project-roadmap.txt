@@ -1,10 +1,12 @@
-- add show on map below title, dynamic set map camera not by link
+* add show on map button below sight title in sightdetail, dynamic set map camera not by link
+? on language change preserve camera 
 - add open ar below title, ?ArViewer
 - settings tab - ligh/dark/mode, selectedLanguage, about (review hr.json and en.json) with web link and buttons privacy_policy, source, OK 
 
 - making android-capacitor
 - hiding logs and deploy
 - publish on Google Play
+- setup Codespace
 
 CURRENT VERSION
 Ver. 2.0.0 (10)
