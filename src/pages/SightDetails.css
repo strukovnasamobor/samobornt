@@ -74,6 +74,13 @@ body.dark .sight-details-gallery {
     margin-bottom: 0;
 }
 
+/* the primary red goes muddy against the dark page, so the button takes the
+   lighter tint the palette already names (#b30026) */
+body.dark .sight-details-map-button {
+    --color: var(--ion-color-primary-tint);
+    --border-color: var(--ion-color-primary-tint);
+}
+
 .sight-details-description {
     margin-top: 8px;
     margin-bottom: 8px;
