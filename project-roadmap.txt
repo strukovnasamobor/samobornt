@@ -1,6 +1,6 @@
+- fix AR on android-capacitor
 - settings tab - ligh/dark/mode, selectedLanguage, about (review hr.json and en.json) with web link and buttons privacy_policy, source, OK 
 
-- making android-capacitor
 - publish on Google Play - new description and screenshots
 - setup Codespace and Google Disk map .google_play
 
