@@ -1,9 +1,8 @@
 - settings tab - ligh/dark/mode, selectedLanguage, about (review hr.json and en.json) with web link and buttons privacy_policy, source, OK 
 
 - making android-capacitor
-- hiding logs and deploy
-- publish on Google Play
-- setup Codespace
+- publish on Google Play - new description and screenshots
+- setup Codespace and Google Disk map .google_play
 
 CURRENT VERSION
 Ver. 2.0.0 (10)
