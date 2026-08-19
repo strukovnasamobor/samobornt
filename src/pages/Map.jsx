@@ -1,7 +1,7 @@
 import "./Map.css";
 import PageLayout from "../components/PageLayout";
 import { useIonRouter } from "@ionic/react";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppContext } from "../AppContext";
 
@@ -16,8 +16,9 @@ const FEATURE_COLLECTIONS = {
   hr: "0x3Glib9fg1VivuDX6gR",
 };
 
-// Where the map opens when no particular sight is being shown: the old town
-// with all the markers in frame.
+// Where the map opens: the old town with all the markers in frame. It stays the
+// only camera this app spells out — a sight is asked for by id, and the map
+// answers with the position of its own marker.
 const OVERVIEW_CAMERA = {
   lat: 45.799686,
   long: 15.706353,
@@ -30,22 +31,11 @@ const OVERVIEW_CAMERA = {
 // are both readable.
 const SIGHT_ZOOM = 17.5;
 
-// The camera is built from the sight's own coordinates rather than being baked
-// into a fixed link. The URL only frames the map as it boots; once it is up,
-// moving it goes through the set-camera message below, so the frame is never
-// reloaded to change the view.
 const rontomapSrc = (language, camera) =>
   `${RONTOMAP_ORIGIN}/?lat=${camera.lat}&long=${camera.long}&zoom=${camera.zoom}` +
   `&bearing=${camera.bearing}&pitch=${camera.pitch}` +
   `&features_collection=${FEATURE_COLLECTIONS[language] ?? FEATURE_COLLECTIONS.en}` +
   `&embedded=true&style=rontomap_streets_light&geolocation=true&interact=true`;
-
-// A sight keeps the overview's bearing and pitch, so being sent to one moves
-// the map without also spinning it.
-const cameraFor = (target) =>
-  target
-    ? { ...OVERVIEW_CAMERA, lat: target.lat, long: target.long, zoom: SIGHT_ZOOM }
-    : OVERVIEW_CAMERA;
 
 /**
  * A marker carries its sight id as JSON in the description field. That can
@@ -76,87 +66,60 @@ function sightIdFromMarker(marker) {
   return id === undefined || id === null ? null : String(id);
 }
 
-// How long a camera waits for the frame to report itself before we give up on
-// the message and reload the frame around it instead. That covers a map still
-// loading, and a build older than the set-camera command, which never reports.
-const CAMERA_FALLBACK_MS = 4000;
-
 export default function Map() {
   const { sights, mapTarget } = useContext(AppContext);
   const router = useIonRouter();
   const { i18n } = useTranslation();
 
   const frameRef = useRef(null);
-  // The frame says "ready" once its map can take commands. A camera asked for
-  // before that waits here and goes out the moment it can.
+  // The frame says "ready" once its map is up and its markers are on it.
+  // Anything asked for before that is simply sent again when it arrives.
   const frameReadyRef = useRef(false);
-  const pendingCameraRef = useRef(null);
-  const fallbackTimerRef = useRef(null);
-  // Bumping this rebuilds the src, which is the only way to reload the frame.
-  const [reloadToken, setReloadToken] = useState(0);
+  const targetRef = useRef(mapTarget);
 
   // resolvedLanguage is the supported code i18next settled on ("en"/"hr"),
   // rather than whatever region-tagged value the detector reported
   const language = i18n.resolvedLanguage ?? i18n.language;
 
-  // Read by the src below, which must not rebuild when the target changes: a
-  // new src reloads the frame, which is exactly what the message avoids.
-  const targetRef = useRef(mapTarget);
-  // The target the current frame was built around, so a camera it already
-  // frames is never sent or reloaded for a second time.
-  const bootTargetRef = useRef(mapTarget);
+  // Fixed for the life of the page. Changing it would navigate the frame — a
+  // full map reload that throws away the user's zoom, bearing, pitch and chosen
+  // basemap — so everything after this goes over postMessage instead.
+  const [src] = useState(() => rontomapSrc(language, OVERVIEW_CAMERA));
 
-  // Only a language switch or a fallback rebuilds the src, and when it does the
-  // frame opens on wherever the map was last sent rather than snapping back to
-  // the overview.
-  const src = useMemo(
-    () => rontomapSrc(language, cameraFor(targetRef.current)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [language, reloadToken]
-  );
-
-  const sendCamera = (camera) => {
+  const post = (message) => {
     const frame = frameRef.current;
-    if (frame?.contentWindow && frameReadyRef.current) {
-      console.log("Rontomap > set-camera:", camera);
-      frame.contentWindow.postMessage(
-        { source: "rontomap-embed", type: "set-camera", camera },
-        RONTOMAP_ORIGIN
-      );
-      return;
-    }
-
-    // Nothing to post to yet. Hold the camera for the frame's own "ready", and
-    // reload the frame around it if that never comes.
-    pendingCameraRef.current = camera;
-    if (fallbackTimerRef.current) return;
-    fallbackTimerRef.current = setTimeout(() => {
-      fallbackTimerRef.current = null;
-      if (frameReadyRef.current) return;
-      console.warn("Rontomap > frame never reported ready; reloading it on the camera instead");
-      setReloadToken((token) => token + 1);
-    }, CAMERA_FALLBACK_MS);
+    if (!frame?.contentWindow || !frameReadyRef.current) return;
+    frame.contentWindow.postMessage({ source: "rontomap-embed", ...message }, RONTOMAP_ORIGIN);
   };
 
-  // Every fresh frame — first mount, a language switch, a fallback reload —
-  // starts unannounced and already framed on the camera it was built with.
+  // Ask the map for the marker that carries this sight's id. It knows where its
+  // own markers are, so nothing here needs coordinates — and if it holds no
+  // marker for the sight it leaves the view alone rather than guessing.
+  const showMarker = (target) => {
+    console.log("Rontomap > show-marker:", target.sightId);
+    post({ type: "show-marker", sightId: target.sightId, zoom: SIGHT_ZOOM });
+  };
+
+  // Markers are localised by swapping the whole collection, which the map does
+  // in place. The frame is left alone, so the view survives a language change.
+  const showFeaturesFor = (lang) => {
+    const collectionId = FEATURE_COLLECTIONS[lang] ?? FEATURE_COLLECTIONS.en;
+    console.log("Rontomap > set-features:", lang, collectionId);
+    post({ type: "set-features", collectionId });
+  };
+
   useEffect(() => {
-    frameReadyRef.current = false;
-    pendingCameraRef.current = null;
-    bootTargetRef.current = targetRef.current;
-    clearTimeout(fallbackTimerRef.current);
-    fallbackTimerRef.current = null;
-  }, [language, reloadToken]);
+    showFeaturesFor(language);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
 
   // "Show on map" hands the sight over here. Every press makes a new target
   // object, so the same sight asked for twice still flies the map back to it.
   useEffect(() => {
     targetRef.current = mapTarget;
-    if (mapTarget && mapTarget !== bootTargetRef.current) sendCamera(cameraFor(mapTarget));
+    if (mapTarget) showMarker(mapTarget);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapTarget]);
-
-  useEffect(() => () => clearTimeout(fallbackTimerRef.current), []);
 
   // Events from inside the iframe: the frame announcing itself, and marker taps
   useEffect(() => {
@@ -168,11 +131,9 @@ export default function Map() {
       if (data.type === "ready") {
         console.log("Rontomap > frame ready");
         frameReadyRef.current = true;
-        clearTimeout(fallbackTimerRef.current);
-        fallbackTimerRef.current = null;
-        const pending = pendingCameraRef.current;
-        pendingCameraRef.current = null;
-        if (pending) sendCamera(pending);
+        // Whatever was asked for while the frame was still coming up
+        showFeaturesFor(language);
+        if (targetRef.current) showMarker(targetRef.current);
         return;
       }
 
@@ -196,17 +157,11 @@ export default function Map() {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [router, sights]);
+  }, [router, sights, language]);
 
   return (
     <PageLayout name="map" center={true}>
       <iframe
-        // keying on the language remounts the frame on a switch, and the token
-        // does the same for a fallback reload; changing src in place would
-        // navigate the existing frame and stack up history instead. A new sight
-        // touches neither: its camera goes over postMessage, so the map moves
-        // without the frame reloading at all.
-        key={`${language}:${reloadToken}`}
         ref={frameRef}
         title="Rontomap"
         style={{ width: "100%", height: "100%", border: "none" }}

@@ -25,7 +25,6 @@ import Loading from "../components/Loading";
 import PageNotFound from "./PageNotFound";
 import localized from "../utils/localized";
 import imageUrls from "../utils/imageUrls";
-import sightLocation from "../utils/sightLocation";
 
 export default function SightDetails() {
   const { sights, setMapTarget } = useContext(AppContext);
@@ -76,13 +75,12 @@ export default function SightDetails() {
   const title = localized(sight.title, i18n.language);
   const description = localized(sight.longDescription, i18n.language);
   const images = imageUrls(sight.imgUrl);
-  const location = sightLocation(sight.location);
 
-  // The embedded map takes no commands once it is running, so the camera
-  // travels through context and the map tab rebuilds its frame around it.
-  // requestedAt makes every press a distinct target, even the same sight twice.
+  // Only the id travels: the map holds a marker for each sight and knows where
+  // it is, so this page never needs the coordinates. requestedAt makes every
+  // press a distinct target, even the same sight asked for twice.
   const showOnMap = () => {
-    setMapTarget({ sightId: sight.id, ...location, requestedAt: Date.now() });
+    setMapTarget({ sightId: sight.id, requestedAt: Date.now() });
     router.push("/map", "forward");
   };
 
@@ -134,17 +132,15 @@ export default function SightDetails() {
               <h2 className="sight-details-title">{title}</h2>
             </IonText>
 
-            {location && (
-              <IonButton
-                className="sight-details-map-button"
-                fill="outline"
-                size="small"
-                onClick={showOnMap}
-              >
-                <IonIcon slot="start" icon={navigateOutline} />
-                {t("showOnMap")}
-              </IonButton>
-            )}
+            <IonButton
+              className="sight-details-map-button"
+              fill="outline"
+              size="small"
+              onClick={showOnMap}
+            >
+              <IonIcon slot="start" icon={navigateOutline} />
+              {t("showOnMap")}
+            </IonButton>
           </IonCol>
         </IonRow>
 
