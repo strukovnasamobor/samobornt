@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- The app header's own colour (the ion-header-background variable in the
+         web app), so the status bar reads as the top of the header rather than
+         a strip of something else. -->
+    <color name="statusBar">#760513</color>
+</resources>
