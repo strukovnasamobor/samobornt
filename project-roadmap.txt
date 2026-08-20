@@ -1,7 +1,7 @@
 - enable back button on android-capacitor
 - settings tab - ligh/dark/mode, selectedLanguage, about (review hr.json and en.json) with web link and buttons privacy_policy, source, OK 
 
-- publish on Google Play
+- publish on Google Play - review screnshoots
 - setup Codespace and Google Disk map .google_play
 
 CURRENT VERSION

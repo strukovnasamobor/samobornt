@@ -1,4 +1,4 @@
-<model-viewer src="samoborcek.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" environment-image="legacy" auto-rotate camera-orbit="40.86deg 85.79deg 2.055m" field-of-view="30deg">
+<model-viewer src="samoborcek.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" camera-orbit="38.16deg 89.26deg 2.055m" field-of-view="30deg">
     <div class="progress-bar hide" slot="progress-bar">
         <div class="update-bar"></div>
     </div>
