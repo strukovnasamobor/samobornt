@@ -1,4 +1,7 @@
-- add other ARs
+- enable back button on android-capacitor
+- add other ARs 
+    - https://www.hi3d.ai/workspace
+    - https://modelviewer.dev/editor/
 - settings tab - ligh/dark/mode, selectedLanguage, about (review hr.json and en.json) with web link and buttons privacy_policy, source, OK 
 
 - publish on Google Play

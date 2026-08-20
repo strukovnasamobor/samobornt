@@ -1,14 +1,75 @@
-/* The text area is what swipes to the neighbouring sight, so it takes the rest
-   of the page: a short description would otherwise leave a dead strip below it
-   where a swipe does nothing. The content element already stops above the tab
-   bar, so "the rest of the page" needs no arithmetic here. */
+/* A drag carries the whole page across to the neighbouring sight, photo and
+   text together, so the swipe box holds everything and reaches the bottom of
+   the page even when the description is short - otherwise a dead strip would be
+   left below the text where a drag does nothing. The content element already
+   stops above the tab bar, so that needs no arithmetic here. */
 .sight-details {
     display: flex;
     flex-direction: column;
 }
 
-.sight-details > ion-grid {
-    flex: 1 1 auto;
+.sight-details-swipe {
+    /* grow into the rest of the page, never shrink below the text in it */
+    flex: 1 0 auto;
+    position: relative;
+    /* the neighbours wait out here until a drag brings them in */
+    overflow: hidden;
+}
+
+.sight-details-track {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    will-change: transform;
+}
+
+/* Only once the finger is off: during the drag the text follows it directly,
+   and a transition would lag a frame behind. */
+.sight-details-track--settling {
+    transition: transform 220ms ease-out;
+}
+
+/* Each panel is a whole page: photo on top, text filling what is left, so the
+   drag carries both across together. */
+.sight-details-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.sight-details-panel--current {
+    flex: 1 0 auto;
+}
+
+.sight-details-text {
+    flex: 1 0 auto;
+}
+
+/* A page to each side, taking no space of their own: the page keeps the height
+   - and so the scrolling - of the sight actually on screen. */
+.sight-details-panel--previous,
+.sight-details-panel--next {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* A neighbour borrows the gallery box for its single photo, and the swiper
+   classes it copies would otherwise leave the photo unsized. */
+.sight-details-panel--previous .sight-details-gallery,
+.sight-details-panel--next .sight-details-gallery {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sight-details-panel--previous {
+    left: -100%;
+}
+
+.sight-details-panel--next {
+    left: 100%;
 }
 
 .sight-details-gallery {
