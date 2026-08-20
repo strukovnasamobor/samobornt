@@ -31,6 +31,10 @@ import arScene from "../utils/arScene";
 // dragged this far across, so it takes a deliberate pull rather than a nudge.
 const COMMIT_FRACTION = 0.5;
 
+// How long the page takes to settle once the finger is off. Must match the
+// transition on .sight-details-track--settling in SightDetails.css.
+const SETTLE_MS = 220;
+
 export default function SightDetails() {
   const { sights, setMapTarget } = useContext(AppContext);
   const { t, i18n } = useTranslation();
@@ -50,6 +54,7 @@ export default function SightDetails() {
   // gesture is still in flight when React has not re-rendered yet.
   const offsetRef = useRef(0);
   const settlingRef = useRef(false);
+  const settleTimerRef = useRef(null);
 
   const index = sights ? sights.findIndex((sight) => sight.id === id) : -1;
   const sight = index === -1 ? null : sights[index];
@@ -66,18 +71,45 @@ export default function SightDetails() {
     router.push("/sights/" + target.id, "forward");
   };
 
+  // Once the page has slid a page aside, the sight it uncovered becomes the
+  // page; coming to rest in the middle just leaves the drag undone. Either way
+  // the transform goes back to nothing: the sight now on screen belongs at
+  // rest, and a page Ionic keeps in its stack must not come back shifted.
+  const finishSettle = () => {
+    const step = stepRef.current;
+    stepRef.current = 0;
+    settlingRef.current = false;
+    settleTimerRef.current = null;
+
+    if (step !== 0) goToSight(step);
+
+    offsetRef.current = 0;
+    setOffset(0);
+    setSettling(false);
+  };
+
   // Let go of the page and it animates to where it belongs: back where it was,
   // or a page aside, uncovering the neighbour that then becomes the page.
+  //
+  // A timer rather than transitionend, which is unreliable here in two ways: it
+  // never fires when a drag happens to end exactly where the page must settle
+  // (the transform does not change, so no transition runs), and it fires for
+  // every transition finishing anywhere inside the page, buttons included.
   const settleTo = (px, step) => {
     stepRef.current = step;
     offsetRef.current = px;
     settlingRef.current = true;
     setOffset(px);
     setSettling(true);
+
+    clearTimeout(settleTimerRef.current);
+    settleTimerRef.current = setTimeout(finishSettle, SETTLE_MS);
   };
 
   // The next sight arrives in place, so the page starts from rest again
   useEffect(() => {
+    clearTimeout(settleTimerRef.current);
+    settleTimerRef.current = null;
     setOffset(0);
     setSettling(false);
     stepRef.current = 0;
@@ -85,14 +117,28 @@ export default function SightDetails() {
     settlingRef.current = false;
   }, [id]);
 
+  useEffect(() => () => clearTimeout(settleTimerRef.current), []);
+
   const swipeHandlers = useSwipeable({
     onSwiping: (e) => {
       // a mostly vertical drag is a scroll, and the page stays where it is
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) return;
+
+      // A drag that started while the page was still settling takes over from
+      // it, so the pending landing must not fire underneath the new gesture.
+      clearTimeout(settleTimerRef.current);
+      settleTimerRef.current = null;
+      stepRef.current = 0;
+
+      // Never further than the neighbour: dragging past a full page would pull
+      // it off the other side and leave nothing on screen.
+      const width = swipeRef.current?.offsetWidth || 1;
+      const dragged = Math.max(-width, Math.min(width, e.deltaX));
+
       settlingRef.current = false;
-      offsetRef.current = e.deltaX;
+      offsetRef.current = dragged;
       setSettling(false);
-      setOffset(e.deltaX);
+      setOffset(dragged);
     },
     onSwiped: (e) => {
       const width = swipeRef.current?.offsetWidth || 1;
@@ -115,22 +161,6 @@ export default function SightDetails() {
     delta: 10,
     trackMouse: true,
   });
-
-  // Once the page has slid off, the sight it uncovered becomes the page; coming
-  // to rest in the middle just leaves the drag undone.
-  const handleSettled = () => {
-    if (!settling) return;
-    const step = stepRef.current;
-    stepRef.current = 0;
-    settlingRef.current = false;
-    if (step === 0) {
-      setSettling(false);
-      return;
-    }
-    // The offset stays where it is until the new sight resets it, so nothing
-    // flashes back into place between here and the route change.
-    goToSight(step);
-  };
 
   // Zoom the photo where it sits. Swiper only emits click for a real tap, not
   // for the end of a drag, so swiping the gallery or panning a zoomed photo
@@ -272,7 +302,6 @@ export default function SightDetails() {
         <div
           className={`sight-details-track${settling ? " sight-details-track--settling" : ""}`}
           style={{ transform: `translate3d(${offset}px, 0, 0)` }}
-          onTransitionEnd={handleSettled}
         >
           {renderPanel(sightAt(-1), "previous")}
           {renderPanel(sight, "current")}
