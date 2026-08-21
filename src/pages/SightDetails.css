@@ -74,8 +74,16 @@
 
 .sight-details-gallery {
     width: 100%;
-    /* the photo sets its own height and must not be squeezed by the column */
+    /* the photo must not be squeezed by the column */
     flex: none;
+    /* A box of its own shape rather than one the first photo dictates, so every
+       photo in the sight fills it whatever its own proportions. 3:2 is what most
+       of the library is. Capped to what is actually on screen: the viewport less
+       the 50px header and the 49.2px tab bar, both from App.css. dvh tracks a
+       collapsing mobile URL bar; the vh line covers browsers without it. */
+    aspect-ratio: 3 / 2;
+    max-height: calc(100vh - 50px - 49.2px);
+    max-height: calc(100dvh - 50px - 49.2px);
     /* the fill beside the photo is inverted against the page: black in light
        mode, white in dark. --gallery-on-fill is whatever reads on top of it. */
     --gallery-fill: #000000;
@@ -92,10 +100,13 @@ body.dark .sight-details-gallery {
     --gallery-on-fill: #000000;
 }
 
-.sight-details-gallery .swiper-slide {
+.sight-details-gallery .swiper-slide,
+.sight-details-gallery .swiper-zoom-container {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 /* Scoped through .swiper-zoom-container so these beat swiper's own
@@ -103,17 +114,11 @@ body.dark .sight-details-gallery {
    object-fit at the same specificity and may land later in the bundle. */
 .sight-details-gallery .swiper-zoom-container img {
     display: block;
-    /* Grow across the full width, but stop once the photo would be taller than
-       what is actually on screen: the viewport less the 50px header and the
-       49.2px tab bar (both from App.css). Past that the box stops growing and
-       object-fit shrinks the photo inside it, so the fill shows at the sides.
-       dvh tracks a collapsing mobile URL bar; the vh line covers browsers
-       without it, which is why the property is declared twice. */
     width: 100%;
-    height: auto;
-    max-height: calc(100vh - 50px - 49.2px);
-    max-height: calc(100dvh - 50px - 49.2px);
-    object-fit: contain;
+    height: 100%;
+    /* Fills the box, cropping what will not fit, rather than shrinking inside
+       it and leaving the fill showing at the sides. */
+    object-fit: cover;
     /* click zooms into the spot you pressed, click again returns */
     cursor: zoom-in;
 }
@@ -124,7 +129,7 @@ body.dark .sight-details-gallery {
 
 /* App.css hides the tab bar from this width up, so that height comes back */
 @media (min-width: 1200px) {
-    .sight-details-gallery .swiper-zoom-container img {
+    .sight-details-gallery {
         /* the tab bar is gone at this width, but the header and the footer each
            take 50px */
         max-height: calc(100vh - 100px);

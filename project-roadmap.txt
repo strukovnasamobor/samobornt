@@ -1,7 +1,2 @@
-- fix sightdetails blink transition
-
-- publish on Google Play
-- setup Codespace and Google Disk map .google_play
-
 CURRENT VERSION
 Ver. 2.0.0 (10)

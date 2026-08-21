@@ -8,6 +8,7 @@ import {
   IonRow,
   IonText,
   useIonRouter,
+  useIonViewWillEnter,
 } from "@ionic/react";
 import { cubeOutline, navigateOutline } from "ionicons/icons";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -41,7 +42,6 @@ export default function SightDetails() {
   const router = useIonRouter();
   const { id } = useParams();
 
-  const galleryRef = useRef(null);
   const swipeRef = useRef(null);
 
   // How far the page sits from its resting place, and where it is heading once
@@ -65,23 +65,34 @@ export default function SightDetails() {
       ? null
       : sights[(index + step + sights.length) % sights.length];
 
+  // Replace rather than push: pushing mounts a second copy of this page on top
+  // of the one being swiped away, and for the frame before it has laid out the
+  // screen shows an empty page - the blink. Replacing keeps one page and simply
+  // changes which sight it is on. It also keeps the tab's history to the list
+  // the reader came from, rather than one entry per swipe.
   const goToSight = (step) => {
     const target = sightAt(step);
     if (!target) return;
-    router.push("/sights/" + target.id, "forward");
+    router.push("/sights/" + target.id, "none", "replace");
   };
 
   // Once the page has slid a page aside, the sight it uncovered becomes the
-  // page; coming to rest in the middle just leaves the drag undone. Either way
-  // the transform goes back to nothing: the sight now on screen belongs at
-  // rest, and a page Ionic keeps in its stack must not come back shifted.
+  // page; coming to rest in the middle just leaves the drag undone.
   const finishSettle = () => {
     const step = stepRef.current;
     stepRef.current = 0;
     settlingRef.current = false;
     settleTimerRef.current = null;
 
-    if (step !== 0) goToSight(step);
+    if (step !== 0) {
+      // Leave the page exactly where the drag put it. What is on screen is the
+      // neighbour it uncovered, which is the sight being navigated to, so the
+      // picture does not change as the new page takes over. Putting the
+      // transform back here instead would snap this sight into view first -
+      // the blink of the wrong page before the right one arrives.
+      goToSight(step);
+      return;
+    }
 
     offsetRef.current = 0;
     setOffset(0);
@@ -107,7 +118,7 @@ export default function SightDetails() {
   };
 
   // The next sight arrives in place, so the page starts from rest again
-  useEffect(() => {
+  const resetPosition = () => {
     clearTimeout(settleTimerRef.current);
     settleTimerRef.current = null;
     setOffset(0);
@@ -115,7 +126,18 @@ export default function SightDetails() {
     stepRef.current = 0;
     offsetRef.current = 0;
     settlingRef.current = false;
+  };
+
+  useEffect(() => {
+    resetPosition();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // A page left a page aside after a swipe is not unmounted - Ionic keeps it in
+  // the tab's stack - so put it back at rest before it is ever shown again.
+  useIonViewWillEnter(() => {
+    resetPosition();
+  });
 
   useEffect(() => () => clearTimeout(settleTimerRef.current), []);
 
@@ -203,7 +225,6 @@ export default function SightDetails() {
           (current ? (
             <Swiper
               modules={[Navigation, Pagination, Zoom]}
-              onSwiper={(swiper) => { galleryRef.current = swiper; }}
               slidesPerView={1}
               spaceBetween={10}
               // swiper starts following the finger after 5px and treats anything
@@ -214,8 +235,16 @@ export default function SightDetails() {
               navigation
               pagination={{ clickable: true, dynamicBullets: true }}
               loop={images.length > 1}
-              // the photo sets its own height, so let the gallery follow it
-              autoHeight={true}
+              // Off deliberately. With it on, Swiper measures only once the photo
+              // has loaded, so a freshly mounted gallery paints at zero height
+              // first: the text jumps to the top of the page for one frame and
+              // the photo shoves it down again - the blink after a swipe. The
+              // photo sizes itself through CSS anyway (width 100%, height auto,
+              // capped by max-height), so the gallery has its height from the
+              // first paint. The cost is that a photo shaped differently from
+              // the first one in the same sight letterboxes into the fill
+              // instead of resizing the gallery.
+              autoHeight={false}
               // toggle:false drops the built-in double-tap; the click below
               // drives the zoom instead. Two-finger pinch stays enabled.
               zoom={{ maxRatio: 4, toggle: false }}
@@ -230,8 +259,6 @@ export default function SightDetails() {
                       src={url}
                       alt={`${name} ${imageIndex + 1}`}
                       draggable={false}
-                      // autoHeight measures on init, before the image has a height
-                      onLoad={() => galleryRef.current?.update()}
                     />
                   </div>
                 </SwiperSlide>
