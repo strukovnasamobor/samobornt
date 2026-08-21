@@ -104,6 +104,11 @@ ion-header .header-navigation :is(ion-buttons, ion-button) {
     height: 100%;
 }
 
+/* the nav links read as the header's own text, at the size the title uses */
+ion-header .header-navigation ion-button {
+    font-size: 16px;
+}
+
 ion-header ion-searchbar {
     height: 100%;
     padding-top: 0px !important;

@@ -59,6 +59,23 @@ body.dark .alert-wrapper {
   background-color: black !important;
 }
 
+/* The app has no Ionic dark palette loaded, so Ionic's stepped colours stay
+   the light ones: the option labels in a select's alert come out near-black
+   and disappear against the dark alert above. The selected option needs the
+   second selector - Ionic colours that one through an [aria-checked] rule that
+   outranks the first. */
+body.dark .alert-wrapper :is(.alert-radio-label, .alert-checkbox-label, .alert-message),
+body.dark .alert-wrapper [aria-checked="true"] .alert-radio-label {
+  color: var(--ion-text-color);
+}
+
+/* The option under focus - the selected one, when the alert opens - is given a
+   light grey highlight, which is right on a white alert and blinding on a black
+   one. Keep the highlight, as a lift off the background rather than a slab. */
+body.dark .alert-wrapper .alert-tappable.ion-focused {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 /* Large devices */
 @media (min-width: 1200px) {
   ion-tab-bar {

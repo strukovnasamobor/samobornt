@@ -29,7 +29,7 @@ import arScene from "../utils/arScene";
 
 // Letting go moves to the neighbouring sight only once the page has been
 // dragged this far across, so it takes a deliberate pull rather than a nudge.
-const COMMIT_FRACTION = 0.5;
+const COMMIT_FRACTION = 0.25;
 
 // How long the page takes to settle once the finger is off. Must match the
 // transition on .sight-details-track--settling in SightDetails.css.

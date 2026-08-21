@@ -13,6 +13,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -110,6 +111,45 @@ public class MainActivity extends BridgeActivity {
                 }
             }
         );
+
+        // System back walks the WebView's history — the app's own pages, and the
+        // static AR scenes it hands over to — and only closes the app once there
+        // is nothing left to go back to. Capacitor brings no back handling of its
+        // own, so without this every back press quit the app outright.
+        //
+        // Through the dispatcher rather than onBackPressed(), which is not called
+        // at all from Android 15 (targetSdk 35+) now that predictive back is on.
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                WebView webView = MainActivity.this.bridge.getWebView();
+
+                // Ask the page first. Moving between pages in the app pushes
+                // state rather than loading a document, so the WebView's own
+                // back-forward list never sees it and canGoBack() reads false
+                // even several pages deep; only the router knows. It answers
+                // "true" when it went back (see window.samobornt.goBack in
+                // App.jsx), and anything else means it had nowhere to go.
+                webView.evaluateJavascript(
+                    "window.samobornt && window.samobornt.goBack ? window.samobornt.goBack() : false",
+                    value -> {
+                        if ("true".equals(value)) return;
+
+                        // A page outside the app, an AR scene say, is a real
+                        // document and does show up in the WebView's history.
+                        if (webView.canGoBack()) {
+                            webView.goBack();
+                            return;
+                        }
+
+                        // Nowhere left to go: let the system do what it would
+                        // have done and close the app.
+                        setEnabled(false);
+                        getOnBackPressedDispatcher().onBackPressed();
+                    }
+                );
+            }
+        });
 
         // Force-dark OFF so Samsung Internet / Android WebView cannot auto-invert.
         WebSettings s = this.bridge.getWebView().getSettings();
