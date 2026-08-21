@@ -9,6 +9,16 @@ export default defineConfig({
       registerType: "autoUpdate",
       injectRegister: "auto",
       includeAssets: ["**/*"],
+      // The AR scenes are real pages under /ar, not routes of this app. Without
+      // the denylist the catch-all navigation fallback answers them with the app
+      // shell, and the router, which has no route for /ar/:id/index.html, renders
+      // PageNotFound. Listing lang alongside the two Workbox defaults, which this
+      // option replaces rather than extends, lets the ?lang= that ArViewer appends
+      // still match the precached scene, so AR keeps working offline.
+      workbox: {
+        navigateFallbackDenylist: [/^\/ar\//],
+        ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^lang$/],
+      },
       manifest: {
         id: "com.strukovnasamobor.samobornt",
         name: "Samobor N&T",
