@@ -1,6 +1,3 @@
-- settings tab - max width 500px
-- offline and compressing AR
-
 - publish on Google Play
 - setup Codespace and Google Disk map .google_play
 

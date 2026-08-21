@@ -10,7 +10,7 @@
   </head>
   <body>
     <!-- <model-viewer> HTML element -->
-    <model-viewer src="samoborcek.opt4k.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" camera-orbit="38.16deg 89.26deg 2.055m" field-of-view="30deg">
+    <model-viewer src="samoborcek.opt.glb" data-src-full="samoborcek.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" camera-orbit="38.16deg 89.26deg 2.055m" field-of-view="30deg">
       <div class="progress-bar hide" slot="progress-bar">
           <div class="update-bar"></div>
       </div>
@@ -22,7 +22,9 @@
       </div>
     </model-viewer>  
     <script src="script.js"></script>
-    <!-- Loads <model-viewer> for browsers: -->
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
+    <!-- Vendored rather than loaded from a CDN: the app is a PWA and its service
+         worker can only precache same-origin files, so a CDN copy would leave
+         the element undefined offline and the page blank. -->
+    <script type="module" src="/ar/vendor/model-viewer.min.js"></script>
   </body>
 </html>

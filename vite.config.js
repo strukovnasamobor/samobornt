@@ -8,7 +8,22 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
-      includeAssets: ["**/*"],
+      // Everything the app and the AR scenes need offline. Deliberately not
+      // "**/*": that swept in the three full-resolution scans and made the
+      // precache 192 MB, and a service worker whose install fails never
+      // activates. The masters are still deployed and still served to desktop
+      // browsers over the network, they are just not carried offline.
+      includeAssets: [
+        "icons/**/*",
+        "images/**/*",
+        "i18n/*.json",
+        // html/js/css already arrive via the default globPatterns; listing
+        // them here too would only duplicate every entry
+        "ar/*/*.{png,webp}",
+        "ar/*/*.opt.glb",
+        "ar/kremsnita/kremsnita.glb",
+        "ar/i_love_samobor/i_love_samobor.glb",
+      ],
       // The AR scenes are real pages under /ar, not routes of this app. Without
       // the denylist the catch-all navigation fallback answers them with the app
       // shell, and the router, which has no route for /ar/:id/index.html, renders
@@ -16,6 +31,8 @@ export default defineConfig({
       // option replaces rather than extends, lets the ?lang= that ArViewer appends
       // still match the precached scene, so AR keeps working offline.
       workbox: {
+        // the optimized scenes are 10-12 MB each, past the 2 MiB default
+        maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/ar\//],
         ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^lang$/],
       },

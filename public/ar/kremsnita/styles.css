@@ -107,3 +107,12 @@ model-viewer[ar-status="session-started"] > #ar-prompt {
 model-viewer > #ar-prompt > img {
   animation: circle 4s linear infinite;
 }
+
+/* Offline with no WebXR: Scene Viewer would only raise a system dialog asking
+   for a connection, so the button explains itself rather than leading nowhere. */
+#ar-button:disabled {
+  background-image: none;
+  padding: 0px 16px;
+  color: #5f6368;
+  cursor: default;
+}
