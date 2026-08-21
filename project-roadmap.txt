@@ -1,23 +1,5 @@
-? footer on large devices
-? offline and compressing AR
-
-- settings tab - add web link, privacy_policy, source, about button
-    - web link: https://samobornt.web.app/
-    - privacy_policy link: https://samobornt.web.app/privacy_policy.html
-    - source link: https://github.com/strukovnasamobor/samobornt
-    - about text:
-        - en
-            <b>Description:</b><br>Application "Samobor N&T" experience Samobor NOW and as it was THEN with each step. App follows you every step of the way as you get to know the picturesque town of Samobor with a simple interface and navigation. The route leads you through the most interesting sights and you can find out more about them in two languages, Croatian and English. Some points also include augmented reality for an even better experience.<br>
-            The application has no ads and can be used without an Internet connection after the firts launch. Ideal for tourists, passers-by and the curious who want to experience and study this city in an interesting and modern way.<br>
-            <b>Idea by:</b> School of Economics, Trade and Catering, Samobor<br>
-            <b>Created with Partner:</b> Secondary Vocational School, Samobor<br>
-            <b>Supported by:</b> Ministry of Tourism and Sports<br>
-        - hr
-            <b>Description:</b><br>Pomoću aplikacije "Samobor N&T" doživite Samobor DANAS i kakav je bio NEKAD sa svakim korakom. Aplikacija s jednostavnim sučeljem i navigacijom prati vas na svakom koraku dok upoznajte pitoreskni grad Samobor. Zadana ruta prolazi najzanimljivijim znamenitostima i možete saznati više o njima na dva jezika, hrvatskom i engleskom. Na nekim točkama tu je i proširena stvarnost za još bolji doživljaj i iskustvo.
-            Aplikacija nema reklama i nakon prvog pokretanja moguće ju je koristiti i bez internetske veze. Idealno za turiste, prolaznike i znatiželjnike koji žele na zanimljiv i moderan način doživjeti i proučiti ovaj grad.
-            <b>Idea by:</b> School of Economics, Trade and Catering, Samobor<br>
-            <b>Created with Partner:</b> Secondary Vocational School, Samobor<br>
-            <b>Supported by:</b> Ministry of Tourism and Sports<br>
+- settings tab - max width 500px
+- offline and compressing AR
 
 - publish on Google Play
 - setup Codespace and Google Disk map .google_play

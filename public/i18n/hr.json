@@ -19,5 +19,14 @@
   "appearance": "Izgled",
   "light": "Svijetlo",
   "dark": "Tamno",
-  "system": "Sustav"
+  "system": "Sustav",
+  "website": "Web stranica",
+  "googlePlay": "Preuzmite na Google Playu",
+  "privacyPolicy": "Pravila privatnosti",
+  "source": "Izvorni kod",
+  "close": "Zatvori",
+  "about": {
+    "title": "O APLIKACIJI",
+    "text": "<b>Opis:</b><br>Pomoću aplikacije \"Samobor N&T\" doživite Samobor DANAS i kakav je bio NEKAD sa svakim korakom. Aplikacija s jednostavnim sučeljem i navigacijom prati vas na svakom koraku dok upoznajte pitoreskni grad Samobor. Zadana ruta prolazi najzanimljivijim znamenitostima i možete saznati više o njima na dva jezika, hrvatskom i engleskom. Na nekim točkama tu je i proširena stvarnost za još bolji doživljaj i iskustvo.<br>Aplikacija nema reklama i nakon prvog pokretanja moguće ju je koristiti i bez internetske veze. Idealno za turiste, prolaznike i znatiželjnike koji žele na zanimljiv i moderan način doživjeti i proučiti ovaj grad.<br><br><b>Osmislili:</b> Ekonomska, trgovačka i ugostiteljska škola, Samobor<br><b>Izradili s partnerom:</b> Srednja strukovna škola, Samobor<br><b>Podržano od:</b> Ministarstvo turizma i sporta<br>"
+  }
 }

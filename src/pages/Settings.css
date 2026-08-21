@@ -1,16 +1,78 @@
-.settings-list {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    padding-top: 8px;
-    background: transparent;
+/* The grid stops here rather than stretching with the window. Capping the
+   columns directly would not work: ion-col writes its size as an inline style,
+   so the cap goes on their container. */
+.settings-page ion-grid {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.settings-list ion-item {
-    --background: transparent;
+/* One under the other, each as wide as the column they sit in */
+.settings-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 24px;
 }
 
-.settings-theme-segment {
-    width: 100%;
-    margin: 8px 0;
+.settings-action {
+    margin: 0;
+}
+
+/* Icon against the left edge, label centred on the button. Taking the icon out
+   of the flow is what centres the text on the whole button rather than on the
+   space left beside the icon, so the labels line up down the column. */
+.settings-action ion-icon {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+}
+
+/* Ionic paints an overlay with --ion-background-color, which is #000000 in this
+   theme, so the modal has to be told the page's own colours - otherwise dark
+   text lands on a black sheet wherever the box below does not cover it. */
+ion-modal.settings-about-modal {
+    --background: var(--main-background-color, #ffffff);
+    --color: var(--ion-text-color, #000000);
+}
+
+/* The modal carries no ion-content, so this box does its own scrolling. */
+.settings-about {
+    height: 100%;
+    overflow-y: auto;
+    padding: 16px;
+    line-height: 1.6;
+    /* Stated here as well as on the modal above. Either alone would do, and
+       between them nothing can leave dark text on the black sheet that
+       --ion-background-color would otherwise give an overlay. */
+    background: var(--main-background-color, #ffffff);
+    color: var(--ion-text-color, #000000);
+}
+
+.settings-about h2 {
+    margin-top: 0;
+    text-align: center;
+}
+
+.settings-about ion-button {
+    margin-top: 24px;
+}
+
+/* From here up Ionic gives the modal a fixed 600x500 card, which leaves empty
+   sheet below the button because the text is shorter than that. Let it take the
+   height of what is in it, capped so a longer translation scrolls inside the
+   box rather than running off the screen. */
+@media only screen and (min-width: 768px) and (min-height: 600px) {
+    ion-modal.settings-about-modal {
+        --about-max-height: 85vh;
+        --height: auto;
+        --max-height: var(--about-max-height);
+    }
+
+    .settings-about {
+        height: auto;
+        max-height: var(--about-max-height);
+    }
 }

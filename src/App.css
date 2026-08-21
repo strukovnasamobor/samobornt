@@ -76,6 +76,18 @@ body.dark .alert-wrapper .alert-tappable.ion-focused {
   background: rgba(255, 255, 255, 0.12);
 }
 
+/* Outline buttons sit on the page background, where the primary red goes muddy
+   against the dark one, so they take the lighter tint the palette names. The
+   header's navigation is fill="clear" on the red bar and keeps its own white. */
+body.dark ion-button[fill="outline"] {
+  --color: var(--ion-color-primary-tint);
+  --border-color: var(--ion-color-primary-tint);
+  /* Ionic washes the hover with the primary red at 4%, which is nothing against
+     the dark page. Same tint as the text, enough of it to see. */
+  --background-hover: var(--ion-color-primary-tint);
+  --background-hover-opacity: 0.18;
+}
+
 /* Large devices */
 @media (min-width: 1200px) {
   ion-tab-bar {
