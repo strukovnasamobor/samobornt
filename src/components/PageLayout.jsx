@@ -45,11 +45,11 @@ export default function PageLayout({ children, name, center = true, footer = tru
         <div className="main">
           <div className={`${name}${center ? " center" : ""}`}>{children}</div>
         </div>
+        {/* Inside the content, after the page: it belongs to the end of the
+            page and scrolls away with it, rather than being pinned to the
+            bottom of the screen. */}
+        {footer && <Footer />}
       </IonContent>
-      {/* A sibling of the content, not inside it: ion-page is a column flexbox,
-          so the footer takes its height at the bottom and the content shrinks to
-          what is left, with no offsets to keep in step. */}
-      {footer && <Footer />}
     </IonPage>
   );
 }
