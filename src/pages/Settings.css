@@ -15,8 +15,11 @@
     margin-top: 24px;
 }
 
-.settings-action {
+.settings-action,
+.settings-about ion-button {
     margin: 0;
+    /* md gives outline buttons a 2px edge, which is heavy for a stack of them */
+    --border-width: 1px;
 }
 
 /* Icon against the left edge, label centred on the button. Taking the icon out
