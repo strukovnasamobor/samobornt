@@ -125,8 +125,10 @@ body.dark .sight-details-gallery {
 /* App.css hides the tab bar from this width up, so that height comes back */
 @media (min-width: 1200px) {
     .sight-details-gallery .swiper-zoom-container img {
-        max-height: calc(100vh - 50px);
-        max-height: calc(100dvh - 50px);
+        /* the tab bar is gone at this width, but the header and the footer each
+           take 50px */
+        max-height: calc(100vh - 100px);
+        max-height: calc(100dvh - 100px);
     }
 }
 

@@ -11,8 +11,10 @@ import { useTranslation } from 'react-i18next';
 export default function Loading() {
     const { t } = useTranslation();
 
+    // footer={false}: this is on screen only briefly, and it is also what the AR
+    // viewer shows while it hands over to a scene
     return (
-        <PageLayout name="loading">
+        <PageLayout name="loading" footer={false}>
             <IonGrid>
                 <IonRow className="ion-text-center">
                     <IonCol>

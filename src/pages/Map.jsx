@@ -159,8 +159,9 @@ export default function Map() {
     return () => window.removeEventListener("message", handleMessage);
   }, [router, sights, language]);
 
+  // footer={false}: the map takes the whole page
   return (
-    <PageLayout name="map" center={true}>
+    <PageLayout name="map" center={true} footer={false}>
       <iframe
         ref={frameRef}
         title="Rontomap"

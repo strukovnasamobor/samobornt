@@ -1,8 +1,9 @@
 import { IonPage, IonContent } from "@ionic/react";
-import Header from "./Header";  
+import Header from "./Header";
+import Footer from "./Footer";
 import { useEffect, useRef, useState } from "react";
 
-export default function PageLayout({ children, name, center = true }) {
+export default function PageLayout({ children, name, center = true, footer = true }) {
   const contentRef = useRef(null);
   const [contentScrollY, setContentScrollY] = useState(false);
 
@@ -45,6 +46,10 @@ export default function PageLayout({ children, name, center = true }) {
           <div className={`${name}${center ? " center" : ""}`}>{children}</div>
         </div>
       </IonContent>
+      {/* A sibling of the content, not inside it: ion-page is a column flexbox,
+          so the footer takes its height at the bottom and the content shrinks to
+          what is left, with no offsets to keep in step. */}
+      {footer && <Footer />}
     </IonPage>
   );
 }
