@@ -9,24 +9,15 @@
     "sights": "ZNAMENITOSTI",
     "settings": "POSTAVKE"
   },
-  "alert": "Upozorenje",
-  "search": "Pretraži",
   "searchSights": "Pretraži znamenitosti",
   "noResults": "Nema znamenitosti koje odgovaraju pretrazi.",
   "noSights": "Još nema znamenitosti za prikaz.",
   "showOnMap": "Prikaži na karti",
   "openAr": "Otvori AR",
-  "ok": "U redu",
-  "close": "Zatvori",
   "loading": "Učitavanje...",
-  "reset": "Resetiraj",
-  "changeLanguage": "Promijeni jezik",
   "language": "Jezik",
   "appearance": "Izgled",
   "light": "Svijetlo",
   "dark": "Tamno",
-  "system": "Sustav",
-  "about": "O aplikaciji",
-  "about.subHeader": "Autor: Zlatko Damijanić",
-  "about.message": "Srednja strukovna škola, Samobor | www.strukovnasamobor.hr"
+  "system": "Sustav"
 }

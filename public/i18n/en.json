@@ -9,24 +9,15 @@
     "sights": "SIGHTS",
     "settings": "SETTINGS"
   },
-  "alert": "Alert",
-  "search": "Search",
   "searchSights": "Search sights",
   "noResults": "No sights match your search.",
   "noSights": "There are no sights to show yet.",
   "showOnMap": "Show on map",
   "openAr": "Open AR",
-  "ok": "Ok",
-  "close": "Close",
   "loading": "Loading...",
-  "reset": "Reset",
-  "changeLanguage": "Change language",
   "language": "Language",
   "appearance": "Appearance",
   "light": "Light",
   "dark": "Dark",
-  "system": "System",
-  "about": "About",
-  "about.subHeader": "Author: Zlatko Damijanić",
-  "about.message": "High Vocational School, Samobor | www.strukovnasamobor.hr"
+  "system": "System"
 }
