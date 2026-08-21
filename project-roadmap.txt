@@ -1,3 +1,5 @@
+- fix sightdetails blink transition
+
 - publish on Google Play
 - setup Codespace and Google Disk map .google_play
 

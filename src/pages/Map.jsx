@@ -31,11 +31,18 @@ const OVERVIEW_CAMERA = {
 // are both readable.
 const SIGHT_ZOOM = 17.5;
 
-const rontomapSrc = (language, camera) =>
+// The two basemaps that follow the app's theme. The map offers a satellite
+// style too, which is deliberately not one of these: see syncMapStyle below.
+const MAP_STYLES = {
+  light: "rontomap_streets_light",
+  dark: "rontomap_streets_dark",
+};
+
+const rontomapSrc = (language, camera, styleId) =>
   `${RONTOMAP_ORIGIN}/?lat=${camera.lat}&long=${camera.long}&zoom=${camera.zoom}` +
   `&bearing=${camera.bearing}&pitch=${camera.pitch}` +
   `&features_collection=${FEATURE_COLLECTIONS[language] ?? FEATURE_COLLECTIONS.en}` +
-  `&embedded=true&style=rontomap_streets_light&geolocation=true&interact=true`;
+  `&embedded=true&style=${styleId}&geolocation=true&interact=true`;
 
 /**
  * A marker carries its sight id as JSON in the description field. That can
@@ -67,7 +74,7 @@ function sightIdFromMarker(marker) {
 }
 
 export default function Map() {
-  const { sights, mapTarget } = useContext(AppContext);
+  const { sights, mapTarget, isDarkMode } = useContext(AppContext);
   const router = useIonRouter();
   const { i18n } = useTranslation();
 
@@ -84,7 +91,12 @@ export default function Map() {
   // Fixed for the life of the page. Changing it would navigate the frame — a
   // full map reload that throws away the user's zoom, bearing, pitch and chosen
   // basemap — so everything after this goes over postMessage instead.
-  const [src] = useState(() => rontomapSrc(language, OVERVIEW_CAMERA));
+  const [src] = useState(() => rontomapSrc(language, OVERVIEW_CAMERA, isDarkMode ? MAP_STYLES.dark : MAP_STYLES.light));
+
+  // What the map is showing right now. It reports this on ready and again
+  // whenever it changes, including when the user picks a style inside the
+  // frame - which is the case syncMapStyle has to respect.
+  const mapStyleRef = useRef(isDarkMode ? MAP_STYLES.dark : MAP_STYLES.light);
 
   const post = (message) => {
     const frame = frameRef.current;
@@ -108,10 +120,28 @@ export default function Map() {
     post({ type: "set-features", collectionId });
   };
 
+  // Follows the app's light/dark setting in place. Deliberately not done by
+  // changing the frame's src: that navigates the iframe, reloading the map and
+  // discarding the view. A basemap that is neither street style - satellite -
+  // was chosen inside the map on purpose, and the theme leaves it alone.
+  const syncMapStyle = (dark) => {
+    const current = mapStyleRef.current;
+    if (current !== MAP_STYLES.light && current !== MAP_STYLES.dark) return;
+    const wanted = dark ? MAP_STYLES.dark : MAP_STYLES.light;
+    if (current === wanted) return;
+    console.log("Rontomap > set-style:", wanted);
+    post({ type: "set-style", styleId: wanted });
+  };
+
   useEffect(() => {
     showFeaturesFor(language);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
+
+  useEffect(() => {
+    syncMapStyle(isDarkMode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDarkMode]);
 
   // "Show on map" hands the sight over here. Every press makes a new target
   // object, so the same sight asked for twice still flies the map back to it.
@@ -131,9 +161,20 @@ export default function Map() {
       if (data.type === "ready") {
         console.log("Rontomap > frame ready");
         frameReadyRef.current = true;
+        if (data.styleId) mapStyleRef.current = String(data.styleId);
         // Whatever was asked for while the frame was still coming up
         showFeaturesFor(language);
+        syncMapStyle(isDarkMode);
         if (targetRef.current) showMarker(targetRef.current);
+        return;
+      }
+
+      // Sent when the style changes, including when the user picks one from
+      // the map's own control. Recording it is what lets syncMapStyle tell a
+      // deliberate satellite choice from a theme the app set itself.
+      if (data.type === "style-change") {
+        if (data.styleId) mapStyleRef.current = String(data.styleId);
+        console.log("Rontomap > style-change:", data.styleId);
         return;
       }
 
@@ -157,7 +198,7 @@ export default function Map() {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [router, sights, language]);
+  }, [router, sights, language, isDarkMode]);
 
   // footer={false}: the map takes the whole page
   return (
