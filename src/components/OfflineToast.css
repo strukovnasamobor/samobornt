@@ -1,0 +1,68 @@
+.offline-toast {
+  /* body is position: fixed at the full viewport (Ionic's structure.css), the
+     same arrangement Header.css already relies on for its fixed header. */
+  position: fixed;
+  right: 0;
+  bottom: calc(var(--app-tab-bar-height) + var(--ion-safe-area-bottom, 0px) + 12px);
+  left: 0;
+
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+
+  /* ion-tabs has contain: layout and z-index: 0, which makes it a stacking
+     context, so the tab bar's z-index: 10 cannot reach out of it. Any positive
+     value here paints above the whole tab subtree, and staying small leaves
+     Ionic's own overlays, which sit near 20000, on top. */
+  z-index: 20;
+
+  /* Purely informational and not dismissible, so it must never swallow a tap
+     meant for the map or the list underneath. */
+  pointer-events: none;
+}
+
+.offline-toast-message {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 560px;
+  padding: 12px 16px;
+  border-radius: 8px;
+
+  /* Inverted against the page: black on white in light mode, white on black in
+     dark, so it reads as a notice rather than as part of the page. */
+  background-color: var(--offline-toast-background);
+  color: var(--offline-toast-color);
+
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+
+  animation: offline-toast-in 200ms ease-out both;
+}
+
+@keyframes offline-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offline-toast-message {
+    animation: none;
+  }
+}
+
+/* Large devices: App.css hides the tab bar from here, and the footer scrolls
+   inside the content rather than being pinned, so there is no bottom chrome
+   left to clear. */
+@media (min-width: 1200px) {
+  .offline-toast {
+    bottom: calc(var(--ion-safe-area-bottom, 0px) + 16px);
+  }
+}

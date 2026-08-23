@@ -10,7 +10,7 @@ body {
 }
 
 ion-tab-bar {
-  height: 49.2px;
+  height: var(--app-tab-bar-height);
 }
 
 ion-tab-button {

@@ -68,6 +68,14 @@ https://ionicframework.com/docs/theming/colors
     --ion-footer-color: #ffffff;
     --ion-card-background: #ffffff;
     --ion-card-title-color: #000000;
+
+    /* Inverted against the page on purpose: a status strip that has to be
+       noticed while everything else carries on. */
+    --offline-toast-background: #000000;
+    --offline-toast-color: #ffffff;
+
+    /* Shared with App.css so the toast's clearance cannot drift from the bar */
+    --app-tab-bar-height: 49.2px;
 }
 
 body.dark {
@@ -84,4 +92,6 @@ body.dark {
     --ion-header-menu-hover-background: #9e0020;
     --ion-card-background: #222222;
     --ion-card-title-color: #ffffff;
+    --offline-toast-background: #ffffff;
+    --offline-toast-color: #000000;
 }
