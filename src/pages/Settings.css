@@ -18,8 +18,14 @@
 .settings-action,
 .settings-about ion-button {
     margin: 0;
-    /* md gives outline buttons a 2px edge, which is heavy for a stack of them */
+    /* the selects above draw a 1px outline; md would give a button 2px */
     --border-width: 1px;
+}
+
+/* Same height as the selects they sit under, so the column reads as one set
+   of controls rather than two. */
+.settings-action {
+    height: 56px;
 }
 
 /* Icon against the left edge, label centred on the button. Taking the icon out

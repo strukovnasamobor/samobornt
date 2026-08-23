@@ -18,7 +18,7 @@ import SelectMode from "../components/SelectMode";
 // while the privacy policy, being the app's own domain, opens in place and the
 // system back button returns from it.
 const LINKS = [
-  { key: "website", icon: globeOutline, url: "https://samobornt.web.app/" },
+  { key: "webapp", icon: globeOutline, url: "https://samobornt.web.app/" },
   {
     key: "googlePlay",
     icon: logoGooglePlaystore,
