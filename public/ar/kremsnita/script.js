@@ -50,6 +50,13 @@ const arOfflineLabels = {
 };
 
 const arButton = document.querySelector("#ar-button");
+
+// Samsung Internet answers isSessionSupported("immersive-ar") with true and
+// then never presents a session: model-viewer logs "Attempting to present in
+// AR with WebXR..." and nothing happens. It hosts the Trusted Web Activity on
+// Samsung phones whenever it is the default browser, so this is the app for a
+// lot of users. Feature detection cannot see it - the browser has to be named.
+const webxrIsTrustworthy = !/SamsungBrowser/.test(navigator.userAgent);
 let webxrAvailable = false;
 
 const refreshArButton = () => {
@@ -64,7 +71,7 @@ refreshArButton();
 window.addEventListener("online", refreshArButton);
 window.addEventListener("offline", refreshArButton);
 
-if (navigator.xr && navigator.xr.isSessionSupported) {
+if (webxrIsTrustworthy && navigator.xr && navigator.xr.isSessionSupported) {
   navigator.xr
     .isSessionSupported("immersive-ar")
     .then((supported) => {
@@ -81,6 +88,13 @@ if (navigator.xr && navigator.xr.isSessionSupported) {
 // model is put back. Only the heavy scanned scenes carry a data-src-full.
 const modelViewer = document.querySelector("model-viewer");
 const fullModel = modelViewer && modelViewer.dataset.srcFull;
+
+// Scene Viewer is an intent to a separate app, so it works where this
+// browser's WebXR does not. Set before the deferred module upgrades the
+// element, so model-viewer reads the corrected order.
+if (!webxrIsTrustworthy && modelViewer) {
+  modelViewer.setAttribute("ar-modes", "scene-viewer webxr quick-look");
+}
 
 // navigator.userAgentData is Chromium-only. Elsewhere a coarse primary pointer
 // means a touch device, which also catches iPadOS reporting a desktop agent.
