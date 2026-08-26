@@ -4,6 +4,7 @@ import { useIonRouter } from "@ionic/react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppContext } from "../AppContext";
+import { isMapPrepared, markError, markPreparing, markReady } from "../utils/mapOfflineStatus";
 
 // Origin of the embedded map — also the only origin whose messages we accept.
 // Point both at http://localhost:5173 to test against a local rontomap build.
@@ -83,6 +84,9 @@ export default function Map() {
   // Anything asked for before that is simply sent again when it arrives.
   const frameReadyRef = useRef(false);
   const targetRef = useRef(mapTarget);
+  // Which collection the running prepare-offline belongs to, so its
+  // completion is recorded against the right one.
+  const offlineCollectionRef = useRef(null);
 
   // resolvedLanguage is the supported code i18next settled on ("en"/"hr"),
   // rather than whatever region-tagged value the detector reported
@@ -110,6 +114,18 @@ export default function Map() {
   const showMarker = (target) => {
     console.log("Rontomap > show-marker:", target.sightId);
     post({ type: "show-marker", sightId: target.sightId, zoom: SIGHT_ZOOM });
+  };
+
+  // The map's tiles live in the rontomap origin's own cache, which this page
+  // cannot reach or fill from here, so preparing them is a command like any
+  // other. Asked for once per collection: the frame reports progress back, and
+  // markReady records it so later launches go straight to the map.
+  const prepareOfflineMap = (lang) => {
+    const collectionId = FEATURE_COLLECTIONS[lang] ?? FEATURE_COLLECTIONS.en;
+    if (isMapPrepared(collectionId)) return;
+    offlineCollectionRef.current = collectionId;
+    console.log("Rontomap > prepare-offline:", collectionId);
+    post({ type: "prepare-offline" });
   };
 
   // Markers are localised by swapping the whole collection, which the map does
@@ -166,6 +182,25 @@ export default function Map() {
         showFeaturesFor(language);
         syncMapStyle(isDarkMode);
         if (targetRef.current) showMarker(targetRef.current);
+        prepareOfflineMap(language);
+        return;
+      }
+
+      // Tile sweep inside the frame: how far along, and whether it finished.
+      if (data.type === "offline-progress") {
+        markPreparing({ done: data.done, total: data.total, percent: data.percent });
+        return;
+      }
+      if (data.type === "offline-ready") {
+        console.log("Rontomap > offline-ready:", data.total, "tiles");
+        markReady(offlineCollectionRef.current);
+        return;
+      }
+      if (data.type === "offline-error") {
+        // Not recorded, so the next launch tries again - the map really is not
+        // available offline yet.
+        console.warn("Rontomap > offline-error:", data.message);
+        markError();
         return;
       }
 
@@ -207,7 +242,12 @@ export default function Map() {
         ref={frameRef}
         title="Rontomap"
         style={{ width: "100%", height: "100%", border: "none" }}
-        allow="fullscreen; geolocation"
+        // The map tracks heading as well as position, which mapbox does through
+        // DeviceOrientationEvent. In a cross-origin frame those events are gated
+        // by Permissions Policy and simply never fire unless the sensors are
+        // delegated here too - the blue dot then shows, but without the cone
+        // saying which way you are facing.
+        allow="fullscreen; geolocation; gyroscope; accelerometer; magnetometer"
         scrolling="no"
         src={src}
       />

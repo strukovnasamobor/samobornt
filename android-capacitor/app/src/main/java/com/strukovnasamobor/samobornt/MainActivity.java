@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -108,6 +109,24 @@ public class MainActivity extends BridgeActivity {
                         }
                     }
                     return true;
+                }
+
+                // The app is served from server.url, so on the very first launch
+                // with no network there is no service worker yet and nothing
+                // cached to answer with - the WebView would otherwise show
+                // Chrome's own "webpage not available" error. offline.html is
+                // bundled in the APK: it silently retries into the app a few
+                // times, which is what lets a cold start find the worker once it
+                // has woken, and only shows its message when nothing is cached.
+                // Subresource failures are ignored; only the main frame matters.
+                @Override
+                public void onReceivedError(WebView view, WebResourceRequest req, WebResourceError err) {
+                    if (req != null && req.isForMainFrame()) {
+                        Log.w(TAG, "Main frame failed (" + err.getErrorCode() + "), showing offline page");
+                        view.loadUrl("file:///android_asset/public/offline.html");
+                        return;
+                    }
+                    super.onReceivedError(view, req, err);
                 }
             }
         );

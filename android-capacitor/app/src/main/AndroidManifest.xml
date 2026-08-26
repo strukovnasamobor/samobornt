@@ -38,4 +38,13 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- The embedded map offers "track my location", which reaches the WebView
+         as the web Geolocation API rather than through a Capacitor plugin. The
+         WebView still refuses it unless the app itself holds the runtime
+         permission, so without these the control is there but every request is
+         denied. Coarse alongside fine because Android 12+ lets the user grant
+         only the approximate one. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 </manifest>
