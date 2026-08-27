@@ -101,10 +101,15 @@ public class MainActivity extends BridgeActivity {
                     } catch (ActivityNotFoundException e) {
                         // Scene Viewer missing (no Play services for AR, or a
                         // device without it): the intent carries the page to send
-                        // the user to instead.
+                        // the user to instead. Only honoured for the main frame:
+                        // the scenes are shown in an iframe (see ArViewer.jsx),
+                        // and loadUrl can only replace the whole app with the
+                        // fallback, which is the very teardown-and-reload the
+                        // iframe exists to avoid. There the button stays inert,
+                        // as it does anywhere AR is unavailable.
                         String fallback = intent.getStringExtra("browser_fallback_url");
                         Log.w(TAG, "No app for " + intent.getPackage() + "; falling back to " + fallback);
-                        if (fallback != null) {
+                        if (fallback != null && request.isForMainFrame()) {
                             view.loadUrl(fallback);
                         }
                     }
@@ -131,10 +136,9 @@ public class MainActivity extends BridgeActivity {
             }
         );
 
-        // System back walks the WebView's history — the app's own pages, and the
-        // static AR scenes it hands over to — and only closes the app once there
-        // is nothing left to go back to. Capacitor brings no back handling of its
-        // own, so without this every back press quit the app outright.
+        // System back walks the app's own history and only closes the app once
+        // there is nothing left to go back to. Capacitor brings no back handling
+        // of its own, so without this every back press quit the app outright.
         //
         // Through the dispatcher rather than onBackPressed(), which is not called
         // at all from Android 15 (targetSdk 35+) now that predictive back is on.
@@ -154,8 +158,8 @@ public class MainActivity extends BridgeActivity {
                     value -> {
                         if ("true".equals(value)) return;
 
-                        // A page outside the app, an AR scene say, is a real
-                        // document and does show up in the WebView's history.
+                        // A page outside the app, the privacy policy say, is a
+                        // real document and does show up in the WebView's history.
                         if (webView.canGoBack()) {
                             webView.goBack();
                             return;

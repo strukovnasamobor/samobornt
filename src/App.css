@@ -13,6 +13,11 @@ ion-tab-bar {
   height: var(--app-tab-bar-height);
 }
 
+/* The AR viewer's scene takes the whole screen (see App.jsx). */
+ion-tab-bar.tab-bar-hidden {
+  display: none;
+}
+
 ion-tab-button {
   max-width: none;
 }
@@ -104,5 +109,12 @@ body.dark ion-button[fill="outline"] {
        so a short page still finishes at the bottom edge without a scroll */
     min-height: calc(100% - 100px);
     height: fit-content;
+  }
+
+  /* Pages without a footer (the map, loading) only have the header above
+     them; leaving the footer's 50px reserved painted the content background
+     short and showed ion-content's black below the map. */
+  .main.main-no-footer {
+    min-height: calc(100% - 50px);
   }
 }

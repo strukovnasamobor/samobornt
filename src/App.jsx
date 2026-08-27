@@ -1,5 +1,5 @@
 import "./App.css";
-import { Redirect, Route } from "react-router-dom";
+import { Redirect, Route, useLocation } from "react-router-dom";
 import {
   getConfig,
   IonTabs,
@@ -27,6 +27,11 @@ export default function App() {
   const config = getConfig();
   config.set("animated", false);
 
+  // The AR viewer frames a scene that was designed as a standalone full-screen
+  // page, so the tab bar makes way for it. Hidden with a class rather than by
+  // unmounting: IonTabs expects its IonTabBar child to stay put.
+  const arSceneOpen = useLocation().pathname.startsWith("/ar/");
+
   // Android's system back asks the page whether it can go back, because the
   // WebView cannot tell: moving between pages here pushes state rather than
   // loading documents, so the WebView's own history stays empty and its
@@ -50,8 +55,8 @@ export default function App() {
         <Route exact path="/sights" component={Sights} />
         <Route exact path="/sights/:id" component={SightDetails} />
         <Route exact path="/settings" component={Settings} />
-        {/* Not a tab of its own: it hands the browser straight to the static
-            AR page under public/ar, so no tab button points at it. */}
+        {/* Not a tab of its own: it fills the screen with a static AR page
+            from public/ar, so no tab button points at it. */}
         <Route exact path="/ar/:id" component={ArViewer} />
         <Route exact path="/">
           <Redirect to="/map" />
@@ -66,7 +71,7 @@ export default function App() {
         Ionic drives the navigation from href — an extra onClick router.push here
         navigates a second time and corrupts the per-tab history.
       */}
-      <IonTabBar slot="bottom">
+      <IonTabBar slot="bottom" className={arSceneOpen ? "tab-bar-hidden" : undefined}>
         <IonTabButton tab="sights" href="/sights">
           <IonIcon icon={locationOutline} />
           <IonLabel>{t("tabs.sights")}</IonLabel>

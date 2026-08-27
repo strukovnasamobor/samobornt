@@ -42,7 +42,10 @@ export default function PageLayout({ children, name, center = true, footer = tru
       <Header />
       <IonContent id={`${name}-ioncontent`} ref={contentRef} scrollY={contentScrollY}>
         <Header />
-        <div className="main">
+        {/* no-footer: the large-devices min-height in App.css reserves room
+            for the footer, which a footerless page has to claim back or it
+            ends 50px short of the bottom edge. */}
+        <div className={`main${footer ? "" : " main-no-footer"}`}>
           <div className={`${name}${center ? " center" : ""}`}>{children}</div>
         </div>
         {/* Inside the content, after the page: it belongs to the end of the

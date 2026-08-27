@@ -1,0 +1,9 @@
+.ar-viewer-frame {
+  display: block;
+  /* IonPage is a flex column; this is its only child */
+  flex: 1;
+  width: 100%;
+  border: 0;
+  /* what the scene pages paint anyway; covers the frame's first blank paint */
+  background-color: #ffffff;
+}
