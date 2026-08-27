@@ -16,7 +16,7 @@
   "openAr": "Open AR",
   "loading": "Loading...",
   "preparingOffline": "Preparing offline mode. Please keep the app open.",
-  "preparingOfflineMap": "Downloading map for offline use… {{percent}}%",
+  "preparingOfflineMap": "Downloading offline map… {{percent}}%",
   "language": "Language",
   "appearance": "Appearance",
   "light": "Light",

@@ -183,6 +183,13 @@ export default function Map() {
         syncMapStyle(isDarkMode);
         if (targetRef.current) showMarker(targetRef.current);
         prepareOfflineMap(language);
+        // The map reads each language's features from Firestore, which can
+        // only serve offline what it has seen online. Have the frame read the
+        // other languages now, so switching language later - or starting up
+        // in the other one - still finds its markers with no network.
+        const current = FEATURE_COLLECTIONS[language] ?? FEATURE_COLLECTIONS.en;
+        const others = [...new Set(Object.values(FEATURE_COLLECTIONS))].filter((id) => id !== current);
+        if (others.length) post({ type: "prefetch-features", collectionIds: others });
         return;
       }
 
@@ -193,7 +200,11 @@ export default function Map() {
       }
       if (data.type === "offline-ready") {
         console.log("Rontomap > offline-ready:", data.total, "tiles");
-        markReady(offlineCollectionRef.current);
+        // The sweep covers the sights' area, and that is the same in every
+        // language - only the labels differ - so one sweep prepares them all.
+        // Recording each spares the next launch in another language a second
+        // pass over tiles it already has.
+        new Set([offlineCollectionRef.current, ...Object.values(FEATURE_COLLECTIONS)]).forEach(markReady);
         return;
       }
       if (data.type === "offline-error") {

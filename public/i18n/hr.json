@@ -16,7 +16,7 @@
   "openAr": "Otvori AR",
   "loading": "Učitavanje...",
   "preparingOffline": "Držite apl. otvorenom, priprema rada bez interneta.",
-  "preparingOfflineMap": "Preuzimam kartu za rad bez veze… {{percent}}%",
+  "preparingOfflineMap": "Preuzimam offline kartu… {{percent}}%",
   "language": "Jezik",
   "appearance": "Izgled",
   "light": "Svijetlo",
