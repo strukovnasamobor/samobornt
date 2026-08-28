@@ -94,17 +94,31 @@ workflows:
           agvtool what-version
       - name: Set up code signing
         script: |
-          # Diagnostic: show what this App Store Connect key can actually see.
-          app-store-connect list-bundle-ids --bundle-id-identifier "$BUNDLE_ID" || true
+          # set -e matters here: without it only the LAST command decides the
+          # step's exit code, so a failed fetch-signing-files would pass silently
+          # and leave the project unsigned until the archive blew up.
+          set -e
           keychain initialize
-          # --create makes the distribution certificate / App Store profile if
-          # they do not exist yet. The implicit ios_signing block only fetches,
-          # which is why the build failed with "No matching profiles found".
+          # --create makes the distribution certificate and App Store profile
+          # if they do not exist yet.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create
           keychain add-certificates
+          echo "--- provisioning profiles on disk ---"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" || true
+          # Patches DEVELOPMENT_TEAM / PROVISIONING_PROFILE_SPECIFIER /
+          # CODE_SIGN_IDENTITY into the project, matching profiles by bundle id.
           xcode-project use-profiles
+          echo "--- signing settings after use-profiles ---"
+          SETTINGS=$(xcodebuild -project ios-capacitor/App/App.xcodeproj \
+            -scheme "$XCODE_SCHEME" -showBuildSettings 2>/dev/null || true)
+          echo "$SETTINGS" | grep -iE "CODE_SIGN_IDENTITY|CODE_SIGN_STYLE|PROVISIONING_PROFILE|DEVELOPMENT_TEAM" || true
+          # Fail here, with context, rather than 20 lines into an xcodebuild archive.
+          if ! echo "$SETTINGS" | grep -q "PROVISIONING_PROFILE_SPECIFIER"; then
+            echo "ERROR: use-profiles did not patch the project - no profile matched $BUNDLE_ID."
+            exit 1
+          fi
       - name: Build IPA
         script: |
           xcode-project build-ipa \
