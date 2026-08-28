@@ -39,3 +39,46 @@ workflows:
           zip -r ios_app.zip "$XCODE_SCHEME.app"
     artifacts:
       - ios-capacitor/output/Build/Products/Debug-iphonesimulator/ios_app.zip
+
+  ios-release:
+    name: Samobor NT - iOS (TestFlight)
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: hr.strukovnasamobor.samobornt
+      vars:
+        APP_ID: 6805843670
+        XCODE_SCHEME: "App"
+      node: 22
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install and build web
+        script: |
+          npm ci
+          npm run build
+      - name: Capacitor sync
+        script: npx cap sync ios
+      - name: Set build number
+        script: |
+          cd ios-capacitor/App
+          LATEST=$(app-store-connect get-latest-app-store-build-number "$APP_ID" || echo 0)
+          agvtool new-version -all $(($LATEST + 1))
+      - name: Apply provisioning profile
+        script: xcode-project use-profiles
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --workspace "ios-capacitor/App/App.xcworkspace" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
