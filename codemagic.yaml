@@ -15,7 +15,7 @@ workflows:
       - name: Sanity check
         script: |
           ls -la ios-capacitor/App
-          xcodebuild -list -workspace ios-capacitor/App/App.xcworkspace
+          xcodebuild -list -project ios-capacitor/App/App.xcodeproj
       - name: Install and build web
         script: |
           npm ci
@@ -25,7 +25,7 @@ workflows:
       - name: Build unsigned simulator .app
         script: |
           xcodebuild \
-            -workspace "ios-capacitor/App/App.xcworkspace" \
+            -project "ios-capacitor/App/App.xcodeproj" \
             -scheme "$XCODE_SCHEME" \
             -configuration Debug \
             -sdk iphonesimulator \
