@@ -12,5 +12,10 @@
     "allowMixedContent": false,
     "captureInput": true,
     "path": "android-capacitor"
+  },
+  "ios": {
+    "path": "ios-capacitor",
+    "contentInset": "always",
+    "limitsNavigationsToAppBoundDomains": true
   }
 }
