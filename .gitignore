@@ -43,5 +43,8 @@ android-capacitor/app/release/*
 # to .google_play/signing-key-info.txt values if this file is absent.
 keystore.properties
 
+# App Store
+.app_store/*
+
 # Local settings
 .claude

@@ -98,11 +98,22 @@ workflows:
           # step's exit code, so a failed fetch-signing-files would pass silently
           # and leave the project unsigned until the archive blew up.
           set -e
+          # Apple only ever stores the public certificate; the private key stays
+          # on whatever machine made the original CSR. Without one, fetch fails
+          # with "Cannot save Signing Certificates without certificate private key".
+          if [ -z "$CERTIFICATE_PRIVATE_KEY" ]; then
+            echo "ERROR: CERTIFICATE_PRIVATE_KEY is not set."
+            echo "Generate one with:  ssh-keygen -t rsa -b 2048 -m PEM -f cert_key -q -N ''"
+            echo "then add the contents of cert_key as a secure variable in the group."
+            exit 1
+          fi
           keychain initialize
-          # --create makes the distribution certificate and App Store profile
-          # if they do not exist yet.
+          # --create makes the distribution certificate and App Store profile if
+          # they do not exist yet, using the private key supplied above so the
+          # certificate is actually usable for signing.
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
+            --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
             --create
           keychain add-certificates
           echo "--- provisioning profiles on disk ---"
