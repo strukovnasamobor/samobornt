@@ -1,144 +1,103 @@
-workflows:
-  ios-simulator:
-    name: Samobor NT - iOS (Appetize)
-    instance_type: mac_mini_m2
-    max_build_duration: 30
-    environment:
-      groups:
-        - appetize
-      vars:
-        XCODE_SCHEME: "App"
-      node: 22
-      xcode: latest
-      cocoapods: default
-    scripts:
-      - name: Sanity check
-        script: |
-          ls -la ios-capacitor/App
-          xcodebuild -list -project ios-capacitor/App/App.xcodeproj
-      - name: Generate firebase.js
-        script: node scripts/write-firebase-config.mjs
-      - name: Install and build web
-        script: |
-          npm ci
-          npm run build
-      - name: Capacitor sync
-        script: npx cap sync ios
-      - name: Build unsigned simulator .app
-        script: |
-          xcodebuild \
-            -project "ios-capacitor/App/App.xcodeproj" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -derivedDataPath ios-capacitor/output \
-            CODE_SIGNING_ALLOWED=NO
-      - name: Zip the .app bundle
-        script: |
-          cd ios-capacitor/output/Build/Products/Debug-iphonesimulator
-          zip -r ios_app.zip "$XCODE_SCHEME.app"
-    artifacts:
-      - ios-capacitor/output/Build/Products/Debug-iphonesimulator/ios_app.zip
-
-  ios-release:
-    name: Samobor NT - iOS (TestFlight)
-    instance_type: mac_mini_m2
-    max_build_duration: 45
-    integrations:
-      # Must match the App Store Connect API key name in Codemagic exactly.
-      app_store_connect: "App Store Connect - Personal"
-    environment:
-      groups:
-        # Supplies the Firebase config consumed by scripts/write-firebase-config.mjs
-        # (firebase.js is gitignored, so CI regenerates it before the web build).
-        - appetize
-      vars:
-        APP_ID: 6805843670
-        BUNDLE_ID: hr.strukovnasamobor.samobornt
-        XCODE_SCHEME: "App"
-      node: 22
-      xcode: latest
-      cocoapods: default
-    scripts:
-      - name: Generate firebase.js
-        script: node scripts/write-firebase-config.mjs
-      - name: Install and build web
-        script: |
-          npm ci
-          npm run build
-      - name: Capacitor sync
-        script: npx cap sync ios
-      - name: Set build number
-        script: |
-          set -e
-          # Take the highest build number Apple knows about. TestFlight is the one
-          # that matters (App Store Connect rejects duplicates against it), but the
-          # released App Store number is checked too in case it is ever ahead.
-          # Either command exits non-zero when there is nothing to report, hence
-          # the fallbacks and the integer guard.
-          num_or_zero() {
-            v=$(printf '%s' "$1" | tr -d '[:space:]')
-            case "$v" in
-              '' | *[!0-9]* ) echo 0 ;;
-              * ) echo "$v" ;;
-            esac
-          }
-          TF=$(num_or_zero "$(app-store-connect get-latest-testflight-build-number "$APP_ID" 2>/dev/null | tail -1)")
-          AS=$(num_or_zero "$(app-store-connect get-latest-app-store-build-number "$APP_ID" 2>/dev/null | tail -1)")
-          LATEST=$TF
-          if [ "$AS" -gt "$LATEST" ]; then LATEST=$AS; fi
-          BUILD_NUMBER=$((LATEST + 1))
-          echo "TestFlight=$TF AppStore=$AS -> building $BUILD_NUMBER"
-          cd ios-capacitor/App
-          agvtool new-version -all "$BUILD_NUMBER"
-          agvtool what-version
-      - name: Set up code signing
-        script: |
-          # set -e matters here: without it only the LAST command decides the
-          # step's exit code, so a failed fetch-signing-files would pass silently
-          # and leave the project unsigned until the archive blew up.
-          set -e
-          # Apple only ever stores the public certificate; the private key stays
-          # on whatever machine made the original CSR. Without one, fetch fails
-          # with "Cannot save Signing Certificates without certificate private key".
-          if [ -z "$CERTIFICATE_PRIVATE_KEY" ]; then
-            echo "ERROR: CERTIFICATE_PRIVATE_KEY is not set."
-            echo "Generate one with:  ssh-keygen -t rsa -b 2048 -m PEM -f cert_key -q -N ''"
-            echo "then add the contents of cert_key as a secure variable in the group."
-            exit 1
-          fi
-          keychain initialize
-          # --create makes the distribution certificate and App Store profile if
-          # they do not exist yet, using the private key supplied above so the
-          # certificate is actually usable for signing.
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
-            --create
-          keychain add-certificates
-          echo "--- provisioning profiles on disk ---"
-          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" || true
-          # Patches DEVELOPMENT_TEAM / PROVISIONING_PROFILE_SPECIFIER /
-          # CODE_SIGN_IDENTITY into the project, matching profiles by bundle id.
-          xcode-project use-profiles
-          echo "--- signing settings after use-profiles ---"
-          SETTINGS=$(xcodebuild -project ios-capacitor/App/App.xcodeproj \
-            -scheme "$XCODE_SCHEME" -showBuildSettings 2>/dev/null || true)
-          echo "$SETTINGS" | grep -iE "CODE_SIGN_IDENTITY|CODE_SIGN_STYLE|PROVISIONING_PROFILE|DEVELOPMENT_TEAM" || true
-          # Fail here, with context, rather than 20 lines into an xcodebuild archive.
-          if ! echo "$SETTINGS" | grep -q "PROVISIONING_PROFILE_SPECIFIER"; then
-            echo "ERROR: use-profiles did not patch the project - no profile matched $BUNDLE_ID."
-            exit 1
-          fi
-      - name: Build IPA
-        script: |
-          xcode-project build-ipa \
-            --project "ios-capacitor/App/App.xcodeproj" \
-            --scheme "$XCODE_SCHEME"
-    artifacts:
-      - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
+ios-release:
+  name: Samobor NT - iOS (TestFlight)
+  instance_type: mac_mini_m2
+  max_build_duration: 45
+  integrations:
+    # Must match the App Store Connect API key name in Codemagic exactly.
+    app_store_connect: "App Store Connect - Personal"
+  environment:
+    groups:
+      # Supplies the Firebase config consumed by scripts/write-firebase-config.mjs
+      # (firebase.js is gitignored, so CI regenerates it before the web build).
+      - appetize
+    vars:
+      APP_ID: 6805843670
+      MARKETING_VERSION: 2.3.0
+      BUNDLE_ID: hr.strukovnasamobor.samobornt
+      XCODE_SCHEME: "App"
+    node: 22
+    xcode: latest
+    cocoapods: default
+  scripts:
+    - name: Generate firebase.js
+      script: node scripts/write-firebase-config.mjs
+    - name: Install and build web
+      script: |
+        npm ci
+        npm run build
+    - name: Capacitor sync
+      script: npx cap sync ios
+    - name: Set build number
+      script: |
+        set -e
+        # Take the highest build number Apple knows about. TestFlight is the one
+        # that matters (App Store Connect rejects duplicates against it), but the
+        # released App Store number is checked too in case it is ever ahead.
+        # Either command exits non-zero when there is nothing to report, hence
+        # the fallbacks and the integer guard.
+        num_or_zero() {
+          v=$(printf '%s' "$1" | tr -d '[:space:]')
+          case "$v" in
+            '' | *[!0-9]* ) echo 0 ;;
+            * ) echo "$v" ;;
+          esac
+        }
+        TF=$(num_or_zero "$(app-store-connect get-latest-testflight-build-number "$APP_ID" 2>/dev/null | tail -1)")
+        AS=$(num_or_zero "$(app-store-connect get-latest-app-store-build-number "$APP_ID" 2>/dev/null | tail -1)")
+        LATEST=$TF
+        if [ "$AS" -gt "$LATEST" ]; then LATEST=$AS; fi
+        BUILD_NUMBER=$((LATEST + 1))
+        echo "TestFlight=$TF AppStore=$AS -> building $BUILD_NUMBER"
+        cd ios-capacitor/App
+        agvtool new-version -all "$BUILD_NUMBER"
+        agvtool what-version
+    - name: Set up code signing
+      script: |
+        # set -e matters here: without it only the LAST command decides the
+        # step's exit code, so a failed fetch-signing-files would pass silently
+        # and leave the project unsigned until the archive blew up.
+        set -e
+        # Apple only ever stores the public certificate; the private key stays
+        # on whatever machine made the original CSR. Without one, fetch fails
+        # with "Cannot save Signing Certificates without certificate private key".
+        if [ -z "$CERTIFICATE_PRIVATE_KEY" ]; then
+          echo "ERROR: CERTIFICATE_PRIVATE_KEY is not set."
+          echo "Generate one with:  ssh-keygen -t rsa -b 2048 -m PEM -f cert_key -q -N ''"
+          echo "then add the contents of cert_key as a secure variable in the group."
+          exit 1
+        fi
+        keychain initialize
+        # --create makes the distribution certificate and App Store profile if
+        # they do not exist yet, using the private key supplied above so the
+        # certificate is actually usable for signing.
+        app-store-connect fetch-signing-files "$BUNDLE_ID" \
+          --type IOS_APP_STORE \
+          --certificate-key "@env:CERTIFICATE_PRIVATE_KEY" \
+          --create
+        keychain add-certificates
+        echo "--- provisioning profiles on disk ---"
+        ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" || true
+        # Patches DEVELOPMENT_TEAM / PROVISIONING_PROFILE_SPECIFIER /
+        # CODE_SIGN_IDENTITY into the project, matching profiles by bundle id.
+        xcode-project use-profiles
+        echo "--- signing settings after use-profiles ---"
+        SETTINGS=$(xcodebuild -project ios-capacitor/App/App.xcodeproj \
+          -scheme "$XCODE_SCHEME" -showBuildSettings 2>/dev/null || true)
+        echo "$SETTINGS" | grep -iE "CODE_SIGN_IDENTITY|CODE_SIGN_STYLE|PROVISIONING_PROFILE|DEVELOPMENT_TEAM" || true
+        # Fail here, with context, rather than 20 lines into an xcodebuild archive.
+        if ! echo "$SETTINGS" | grep -q "PROVISIONING_PROFILE_SPECIFIER"; then
+          echo "ERROR: use-profiles did not patch the project - no profile matched $BUNDLE_ID."
+          exit 1
+        fi
+    - name: Build IPA
+      script: |
+        xcode-project build-ipa \
+          --project "ios-capacitor/App/App.xcodeproj" \
+          --scheme "$XCODE_SCHEME"
+  artifacts:
+    - build/ios/ipa/*.ipa
+    - /tmp/xcodebuild_logs/*.log
+  publishing:
+    app_store_connect:
+      auth: integration
+      submit_to_testflight: true

@@ -1,2 +1,2 @@
 CURRENT VERSION
-Ver. 2.3.0 (14)
+Ver. 2.3.0 (androdi: 14, ios: 2)
