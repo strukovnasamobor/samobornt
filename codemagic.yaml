@@ -47,6 +47,10 @@ workflows:
     integrations:
       app_store_connect: codemagic
     environment:
+      groups:
+        # Supplies the Firebase config consumed by scripts/write-firebase-config.mjs
+        # (firebase.js is gitignored, so CI regenerates it before the web build).
+        - appetize
       ios_signing:
         distribution_type: app_store
         bundle_identifier: hr.strukovnasamobor.samobornt
@@ -57,6 +61,8 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
+      - name: Generate firebase.js
+        script: node scripts/write-firebase-config.mjs
       - name: Install and build web
         script: |
           npm ci
@@ -73,7 +79,7 @@ workflows:
       - name: Build IPA
         script: |
           xcode-project build-ipa \
-            --workspace "ios-capacitor/App/App.xcworkspace" \
+            --project "ios-capacitor/App/App.xcodeproj" \
             --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
