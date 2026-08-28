@@ -51,11 +51,9 @@ workflows:
         # Supplies the Firebase config consumed by scripts/write-firebase-config.mjs
         # (firebase.js is gitignored, so CI regenerates it before the web build).
         - appetize
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: hr.strukovnasamobor.samobornt
       vars:
         APP_ID: 6805843670
+        BUNDLE_ID: hr.strukovnasamobor.samobornt
         XCODE_SCHEME: "App"
       node: 22
       xcode: latest
@@ -71,11 +69,41 @@ workflows:
         script: npx cap sync ios
       - name: Set build number
         script: |
+          set -e
+          # Take the highest build number Apple knows about. TestFlight is the one
+          # that matters (App Store Connect rejects duplicates against it), but the
+          # released App Store number is checked too in case it is ever ahead.
+          # Either command exits non-zero when there is nothing to report, hence
+          # the fallbacks and the integer guard.
+          num_or_zero() {
+            v=$(printf '%s' "$1" | tr -d '[:space:]')
+            case "$v" in
+              '' | *[!0-9]* ) echo 0 ;;
+              * ) echo "$v" ;;
+            esac
+          }
+          TF=$(num_or_zero "$(app-store-connect get-latest-testflight-build-number "$APP_ID" 2>/dev/null | tail -1)")
+          AS=$(num_or_zero "$(app-store-connect get-latest-app-store-build-number "$APP_ID" 2>/dev/null | tail -1)")
+          LATEST=$TF
+          if [ "$AS" -gt "$LATEST" ]; then LATEST=$AS; fi
+          BUILD_NUMBER=$((LATEST + 1))
+          echo "TestFlight=$TF AppStore=$AS -> building $BUILD_NUMBER"
           cd ios-capacitor/App
-          LATEST=$(app-store-connect get-latest-app-store-build-number "$APP_ID" || echo 0)
-          agvtool new-version -all $(($LATEST + 1))
-      - name: Apply provisioning profile
-        script: xcode-project use-profiles
+          agvtool new-version -all "$BUILD_NUMBER"
+          agvtool what-version
+      - name: Set up code signing
+        script: |
+          # Diagnostic: show what this App Store Connect key can actually see.
+          app-store-connect list-bundle-ids --bundle-id-identifier "$BUNDLE_ID" || true
+          keychain initialize
+          # --create makes the distribution certificate / App Store profile if
+          # they do not exist yet. The implicit ios_signing block only fetches,
+          # which is why the build failed with "No matching profiles found".
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
       - name: Build IPA
         script: |
           xcode-project build-ipa \
