@@ -16,6 +16,8 @@ workflows:
         script: |
           ls -la ios-capacitor/App
           xcodebuild -list -project ios-capacitor/App/App.xcodeproj
+      - name: Generate firebase.js
+        script: node scripts/write-firebase-config.mjs
       - name: Install and build web
         script: |
           npm ci
