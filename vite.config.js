@@ -23,6 +23,9 @@ export default defineConfig({
         "ar/*/*.opt.glb",
         "ar/kremsnita/kremsnita.glb",
         "ar/i_love_samobor/i_love_samobor.glb",
+        // The .usdz copies are deliberately not listed: AR Quick Look fetches
+        // its own file from the network (it does not read the page's cache),
+        // and they total ~80 MB that is useless to every non-iOS user.
       ],
       // The AR scenes are real pages under /ar, not routes of this app. Without
       // the denylist the catch-all navigation fallback answers them with the app

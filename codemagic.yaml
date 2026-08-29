@@ -10,7 +10,7 @@ workflows:
       groups:
         # Supplies the Firebase config consumed by scripts/write-firebase-config.mjs
         # (firebase.js is gitignored, so CI regenerates it before the web build).
-        - appetize
+        - ios-release
       vars:
         APP_ID: 6805843670
         BUNDLE_ID: hr.strukovnasamobor.samobornt
