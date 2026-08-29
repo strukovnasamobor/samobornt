@@ -7,3 +7,26 @@
   /* what the scene pages paint anyway; covers the frame's first blank paint */
   background-color: #ffffff;
 }
+
+/* The scene fills the page and has no chrome of its own, so this is the only
+   way back on iOS, which has no system back button. Sits above the frame,
+   clear of the notch and the rounded corners. */
+.ar-viewer-close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  left: calc(env(safe-area-inset-left, 0px) + 8px);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  --background: rgba(255, 255, 255, 0.88);
+  --background-activated: #e8eaed;
+  --color: #1f1f1f;
+  --box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ar-viewer-close ion-icon {
+  font-size: 22px;
+}

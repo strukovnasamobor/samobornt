@@ -89,6 +89,46 @@ if (webxrIsTrustworthy && navigator.xr && navigator.xr.isSessionSupported) {
 const modelViewer = document.querySelector("model-viewer");
 const fullModel = modelViewer && modelViewer.dataset.srcFull;
 
+// AR Quick Look is WebKit's "System Preview", and a WKWebView ships with it
+// switched off: only Safari and the in-app Safari sheet turn it on. Inside the
+// app, iOS therefore reports no AR route even with an ios-src, and model-viewer
+// hides its button. The button is kept instead: moved out of model-viewer so
+// the hidden slot cannot take it along, and made to hand the USDZ to the app,
+// which opens it in that Safari sheet. Safari itself never gets here, because
+// there canActivateAR is true and model-viewer runs Quick Look on its own.
+const isIOS =
+  /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+const enableQuickLookHandoff = () => {
+  if (!modelViewer || !arButton || !isIOS || modelViewer.canActivateAR) return;
+  const iosSrc = modelViewer.getAttribute("ios-src");
+  if (!iosSrc) return;
+  const usdzUrl = new URL(iosSrc, window.location.href).href;
+
+  arButton.removeAttribute("slot");
+  document.body.appendChild(arButton);
+  arButton.addEventListener("click", () => {
+    if (arButton.disabled) return;
+    if (window.parent !== window) {
+      window.parent.postMessage(
+        { type: "samobornt:open-quick-look", url: usdzUrl },
+        window.location.origin
+      );
+    } else {
+      // Opened as a plain page: let the browser handle the USDZ itself.
+      window.location.href = usdzUrl;
+    }
+  });
+};
+
+customElements.whenDefined("model-viewer").then(async () => {
+  if (!modelViewer) return;
+  // canActivateAR is settled by the element's first update.
+  await modelViewer.updateComplete;
+  enableQuickLookHandoff();
+});
+
 // Scene Viewer is an intent to a separate app, so it works where this
 // browser's WebXR does not. Set before the deferred module upgrades the
 // element, so model-viewer reads the corrected order.

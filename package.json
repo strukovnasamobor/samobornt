@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
+    "@capacitor/browser": "^8.0.4",
     "@capacitor/core": "^8.5.0",
     "@capacitor/ios": "^8.5.0",
     "@ionic/react": "8.5.6",
