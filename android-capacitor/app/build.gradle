@@ -1,5 +1,36 @@
 apply plugin: 'com.android.application'
 
+// Release signing credentials, in order of preference:
+//  1. android-capacitor/keystore.properties (storeFile/storePassword/
+//     keyAlias/keyPassword) - what CI writes from its secured variables.
+//  2. The PWABuilder key sheet in .google_play/signing-key-info.txt, so a
+//     plain `gradlew bundleRelease` on a dev machine is signed with no setup.
+// Both are gitignored; with neither present the release build stays unsigned.
+def signingProps = new Properties()
+def signingPropsFile = rootProject.file('keystore.properties')
+if (signingPropsFile.exists()) {
+    signingPropsFile.withInputStream { signingProps.load(it) }
+} else {
+    def infoFile = rootProject.file('../.google_play/signing-key-info.txt')
+    if (infoFile.exists()) {
+        // Free text, "Key store password: ..." style - not loadable as
+        // Properties because the field names contain spaces.
+        def fields = [:]
+        infoFile.readLines().each { line ->
+            def idx = line.indexOf(':')
+            if (idx > 0) fields[line.substring(0, idx).trim()] = line.substring(idx + 1).trim()
+        }
+        def storeName = fields['Key store file'] ? new File(fields['Key store file']).name : null
+        if (storeName && fields['Key store password'] && fields['Key alias'] && fields['Key password']) {
+            signingProps['storeFile'] = rootProject.file('../.google_play/' + storeName).absolutePath
+            signingProps['storePassword'] = fields['Key store password']
+            signingProps['keyAlias'] = fields['Key alias']
+            signingProps['keyPassword'] = fields['Key password']
+        }
+    }
+}
+def hasReleaseSigning = signingProps['storeFile'] && file(signingProps['storeFile']).exists()
+
 android {
     namespace = "com.strukovnasamobor.samobornt"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +47,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile file(signingProps['storeFile'])
+                storePassword signingProps['storePassword']
+                keyAlias signingProps['keyAlias']
+                keyPassword signingProps['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

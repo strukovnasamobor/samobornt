@@ -101,3 +101,74 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: false
+
+  android-release:
+    name: Samobor NT - Android
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    environment:
+      android_signing:
+        # The upload keystore (.google_play/samobornt_keystore.jks), added in
+        # Codemagic UI (Team settings > Code signing identities > Android)
+        # under this exact reference name. It provides CM_KEYSTORE_PATH,
+        # CM_KEYSTORE_PASSWORD, CM_KEY_ALIAS and CM_KEY_PASSWORD.
+        - samobornt_keystore
+      groups:
+        # Supplies the Firebase config consumed by scripts/write-firebase-config.mjs
+        # (firebase.js is gitignored, so CI regenerates it before the web build).
+        # Holds GCLOUD_SERVICE_ACCOUNT_CREDENTIALS: the Google Play service
+        # account JSON with release permission on the app.
+        - google_play_release
+      node: 22
+      java: 21
+    scripts:
+      - name: Generate firebase.js
+        script: node scripts/write-firebase-config.mjs
+      - name: Install, build web, sync Android
+        script: |
+          set -e
+          npm ci
+          # build + cap sync android + trim the full-resolution AR masters
+          # out of the packaged assets
+          npm run sync:android
+      - name: Version from Gradle
+        script: |
+          set -e
+          # The release version is owned by app/build.gradle, not generated
+          # here - this only reads it back, fails loudly if it cannot, and
+          # exports it for the log and any later step.
+          VERSION_NAME=$(sed -n 's/.*versionName "\(.*\)".*/\1/p' android-capacitor/app/build.gradle)
+          VERSION_CODE=$(sed -n 's/.*versionCode \([0-9][0-9]*\).*/\1/p' android-capacitor/app/build.gradle)
+          if [ -z "$VERSION_NAME" ] || [ -z "$VERSION_CODE" ]; then
+            echo "ERROR: versionName/versionCode not found in android-capacitor/app/build.gradle"
+            exit 1
+          fi
+          echo "Building $VERSION_NAME (versionCode $VERSION_CODE)"
+          echo "VERSION_NAME=$VERSION_NAME" >> "$CM_ENV"
+          echo "VERSION_CODE=$VERSION_CODE" >> "$CM_ENV"
+      - name: Set up release signing
+        script: |
+          set -e
+          # build.gradle reads this file first, before its local fallback.
+          {
+            echo "storeFile=$CM_KEYSTORE_PATH"
+            echo "storePassword=$CM_KEYSTORE_PASSWORD"
+            echo "keyAlias=$CM_KEY_ALIAS"
+            echo "keyPassword=$CM_KEY_PASSWORD"
+          } > android-capacitor/keystore.properties
+      - name: Build signed AAB and APK
+        script: |
+          set -e
+          cd android-capacitor
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease assembleRelease
+    artifacts:
+      - android-capacitor/app/build/outputs/bundle/release/*.aab
+      - android-capacitor/app/build/outputs/apk/release/*.apk
+      - android-capacitor/app/build/outputs/mapping/release/mapping.txt
+    publishing:
+      google_play:
+        # Play accepts only the .aab; the signed .apk above is just a
+        # downloadable artifact.
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: production
