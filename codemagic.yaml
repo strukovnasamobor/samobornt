@@ -118,7 +118,7 @@ workflows:
         # (firebase.js is gitignored, so CI regenerates it before the web build).
         # Holds GCLOUD_SERVICE_ACCOUNT_CREDENTIALS: the Google Play service
         # account JSON with release permission on the app.
-        - google_play_release
+        - android-release
       node: 22
       java: 21
     scripts:
