@@ -1,2 +1,4 @@
+- ios omplement offline, direct open AR mode, sharing url not local file
+
 CURRENT VERSION
 Ver. 2.3.0 (androdi: 14, ios: 3)

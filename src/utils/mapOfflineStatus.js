@@ -40,6 +40,24 @@ export function isMapPrepared(collectionId) {
   }
 }
 
+// Whether any collection has ever finished preparing - the cheap "the map
+// wait is already over" check for launches after the sweep ran, when the live
+// status above stays "idle" forever. Scanning keys rather than importing the
+// collection ids keeps Map.jsx the only owner of that mapping.
+export function isAnyMapPrepared() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith(STORAGE_PREFIX) && localStorage.getItem(key) === "ready") {
+        return true;
+      }
+    }
+  } catch {
+    // private mode or storage disabled: treat as not prepared
+  }
+  return false;
+}
+
 export function markPreparing({ done = 0, total = 0, percent = 0 } = {}) {
   set({ phase: "preparing", done, total, percent });
 }

@@ -23,21 +23,25 @@ export default defineConfig({
         "ar/*/*.opt.glb",
         "ar/kremsnita/kremsnita.glb",
         "ar/i_love_samobor/i_love_samobor.glb",
-        // The .usdz copies are deliberately not listed: AR Quick Look fetches
-        // its own file from the network (it does not read the page's cache),
-        // and they total ~80 MB that is useless to every non-iOS user.
+        // the list the iOS app prefetches its Quick Look models from
+        "ar/usdz-manifest.json",
+        // The .usdz copies are deliberately not listed: on iOS the native
+        // QuickLook plugin keeps its own copies (the page cache is unreachable
+        // from Quick Look), and they total ~80 MB that is useless to every
+        // non-iOS user.
       ],
       // The AR scenes are real pages under /ar, not routes of this app. Without
       // the denylist the catch-all navigation fallback answers them with the app
       // shell, and the router, which has no route for /ar/:id/index.html, renders
-      // PageNotFound. Listing lang alongside the two Workbox defaults, which this
-      // option replaces rather than extends, lets the ?lang= that ArViewer appends
-      // still match the precached scene, so AR keeps working offline.
+      // PageNotFound. Listing lang and app alongside the two Workbox defaults,
+      // which this option replaces rather than extends, lets the ?lang= and
+      // &app= that ArViewer appends still match the precached scene, so AR
+      // keeps working offline.
       workbox: {
         // the optimized scenes are 10-12 MB each, past the 2 MiB default
         maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/ar\//],
-        ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^lang$/],
+        ignoreURLParametersMatching: [/^utm_/, /^fbclid$/, /^lang$/, /^app$/],
       },
       manifest: {
         id: "com.strukovnasamobor.samobornt",

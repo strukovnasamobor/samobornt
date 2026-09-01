@@ -51,6 +51,12 @@ const arOfflineLabels = {
 
 const arButton = document.querySelector("#ar-button");
 
+// ArViewer appends app=ios only when the app carries the native QuickLook
+// plugin, whose cache can serve the model offline - so inside that shell the
+// online-only lockout below must not apply.
+const nativeIOSShell =
+  new URLSearchParams(window.location.search).get("app") === "ios";
+
 // Samsung Internet answers isSessionSupported("immersive-ar") with true and
 // then never presents a session: model-viewer logs "Attempting to present in
 // AR with WebXR..." and nothing happens. It hosts the Trusted Web Activity on
@@ -61,7 +67,7 @@ let webxrAvailable = false;
 
 const refreshArButton = () => {
   if (!arButton) return;
-  const usable = navigator.onLine || webxrAvailable;
+  const usable = navigator.onLine || webxrAvailable || nativeIOSShell;
   arButton.disabled = !usable;
   const labels = usable ? arButtonLabels : arOfflineLabels;
   arButton.textContent = labels[language] || labels.en;

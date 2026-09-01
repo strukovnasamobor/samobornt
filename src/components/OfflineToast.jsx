@@ -3,6 +3,7 @@ import { useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { getIsPrecaching, subscribe } from "../utils/precacheStatus";
 import { getMapOfflineStatus, subscribe as subscribeMap } from "../utils/mapOfflineStatus";
+import { getArModelStatus, subscribe as subscribeAr } from "../utils/arModelStatus";
 
 // Not an IonToast: positionAnchor measures the tab bar once, when the toast is
 // presented, so it would not follow the 1200px breakpoint where App.css hides
@@ -20,6 +21,10 @@ export default function OfflineToast() {
   // they come from inside the rontomap frame rather than from a worker here.
   const mapStatus = useSyncExternalStore(subscribeMap, getMapOfflineStatus, getMapOfflineStatus);
 
+  // The iOS AR models are a third wait, after the map: the native QuickLook
+  // plugin downloads them into its own cache, reported via arModelPrefetch.
+  const arStatus = useSyncExternalStore(subscribeAr, getArModelStatus, getArModelStatus);
+
   // useSuspense false plus a defaultValue: this has to be readable while the
   // precache is saturating the connection, which is exactly when
   // /i18n/en.json may still be queued behind a scene. Suspending here would
@@ -27,18 +32,26 @@ export default function OfflineToast() {
   const { t } = useTranslation(undefined, { useSuspense: false });
 
   const preparingMap = mapStatus.phase === "preparing";
-  if (!isPrecaching && !preparingMap) return null;
+  const prefetchingAr = arStatus.phase === "prefetching" && arStatus.total > 0;
+  if (!isPrecaching && !preparingMap && !prefetchingAr) return null;
 
   // The app's own files come first and are the shorter wait, so that message
-  // wins while both are running.
+  // wins while both are running; the AR models start only after the map, so
+  // they naturally come last.
   const message = isPrecaching
     ? t("preparingOffline", {
         defaultValue: "Preparing offline mode. Please keep the app open.",
       })
-    : t("preparingOfflineMap", {
-        percent: Math.min(99, Math.floor(mapStatus.percent || 0)),
-        defaultValue: "Downloading map for offline use… {{percent}}%",
-      });
+    : preparingMap
+      ? t("preparingOfflineMap", {
+          percent: Math.min(99, Math.floor(mapStatus.percent || 0)),
+          defaultValue: "Downloading map for offline use… {{percent}}%",
+        })
+      : t("preparingOfflineAr", {
+          completed: arStatus.completed,
+          total: arStatus.total,
+          defaultValue: "Downloading AR models… {{completed}}/{{total}}",
+        });
 
   return (
     <div className="offline-toast" role="status" aria-live="polite">

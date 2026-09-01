@@ -4,8 +4,16 @@ import { IonButton, IonIcon, IonPage, useIonRouter } from "@ionic/react";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { arrowBackOutline } from "ionicons/icons";
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
+
+// The app-local iOS plugin (ios-capacitor/App/App/QuickLookPlugin.swift):
+// presents Apple's native AR Quick Look and keeps the models cached for
+// offline use. registerPlugin is harmless where it does not exist - the
+// availability check below gates every call.
+const QuickLook = registerPlugin("QuickLook");
+const hasQuickLook =
+  Capacitor.getPlatform() === "ios" && Capacitor.isPluginAvailable("QuickLook");
 
 /**
  * The AR scenes are plain static pages under public/ar, outside the React app.
@@ -44,10 +52,23 @@ export default function ArViewer() {
       // Only this site's own models leave the app.
       if (url.origin !== window.location.origin) return;
 
-      // An app build that predates the Browser plugin falls through to
-      // window.open, which the shell hands to external Safari: Quick Look
-      // works there too, it just does not come back to the app by itself.
-      if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("Browser")) {
+      // The QuickLook plugin shows Apple's native AR viewer straight over the
+      // app and serves the model from its own cache, so it works offline; its
+      // share sheet shares the live viewer page rather than the local file.
+      // Builds without it fall back to the in-app Safari sheet, then to
+      // window.open, which the shell hands to external Safari - Quick Look
+      // works in both, they just need a connection.
+      if (hasQuickLook) {
+        QuickLook.open({
+          url: url.href,
+          shareUrl: `${window.location.origin}/ar/${id}`,
+        }).catch(() => {
+          // Offline with nothing cached is the expected rejection, and then
+          // nothing else can fetch the model either - so only errors that
+          // happen with a connection fall through to the sheet.
+          if (navigator.onLine) Browser.open({ url: url.href });
+        });
+      } else if (Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("Browser")) {
         Browser.open({ url: url.href });
       } else {
         window.open(url.href, "_blank", "noopener");
@@ -55,7 +76,7 @@ export default function ArViewer() {
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, []);
+  }, [id]);
 
   // Android has a system back button; iOS has only this. A scene opened
   // straight from a link has nothing to pop, so it lands on the sights list.
@@ -78,10 +99,13 @@ export default function ArViewer() {
           them, and WebXR needs the xr and sensor ones. Without the grant
           model-viewer would quietly fall back to Scene Viewer, which re-fetches
           the model over the network - WebXR is the one AR route that works
-          offline. */}
+          offline.
+          app=ios tells the scene the native QuickLook cache is on board, so
+          its online-only AR lockout must not apply. Appended only when the
+          plugin exists: older builds keep the current gating. */}
       <iframe
         className="ar-viewer-frame"
-        src={`/ar/${id}/index.html?lang=${language}`}
+        src={`/ar/${id}/index.html?lang=${language}${hasQuickLook ? "&app=ios" : ""}`}
         title="AR"
         allow="camera; xr-spatial-tracking; accelerometer; gyroscope; magnetometer; fullscreen"
         allowFullScreen

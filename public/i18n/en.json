@@ -17,6 +17,7 @@
   "loading": "Loading...",
   "preparingOffline": "Preparing offline mode. Please keep the app open.",
   "preparingOfflineMap": "Downloading offline map… {{percent}}%",
+  "preparingOfflineAr": "Downloading AR models… {{completed}}/{{total}}",
   "language": "Language",
   "appearance": "Appearance",
   "light": "Light",

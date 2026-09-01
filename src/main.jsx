@@ -6,6 +6,7 @@ import "./i18n";
 import { IonApp } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { startPrecacheStatusTracking } from "./utils/precacheStatus";
+import { startArModelPrefetch } from "./utils/arModelPrefetch";
 import OfflineToast from "./components/OfflineToast";
 
 import "@ionic/react/css/core.css";
@@ -31,6 +32,11 @@ setupIonicReact({
 // updated worker activates and onNeedRefresh is never called. All this adds is
 // the first-install progress the toast below reads.
 startPrecacheStatusTracking();
+
+// On iOS the native QuickLook plugin caches the AR models for offline use;
+// this kicks off that download once the offline map is out of the way. A
+// no-op everywhere else.
+startArModelPrefetch();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

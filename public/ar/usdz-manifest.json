@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "models": [
+    "/ar/fasnik/fasnik.opt.usdz",
+    "/ar/samoborcek/samoborcek.opt.usdz",
+    "/ar/old_town_samobor/old_town_samobor.opt.usdz",
+    "/ar/kremsnita/kremsnita.usdz",
+    "/ar/i_love_samobor/i_love_samobor.usdz"
+  ]
+}

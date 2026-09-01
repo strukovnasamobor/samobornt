@@ -17,6 +17,7 @@
   "loading": "Učitavanje...",
   "preparingOffline": "Držite apl. otvorenom, priprema rada bez interneta.",
   "preparingOfflineMap": "Preuzimam offline kartu… {{percent}}%",
+  "preparingOfflineAr": "Preuzimam AR modele… {{completed}}/{{total}}",
   "language": "Jezik",
   "appearance": "Izgled",
   "light": "Svijetlo",
