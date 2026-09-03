@@ -21,12 +21,14 @@ workflows:
     scripts:
       - name: Generate firebase.js
         script: node scripts/write-firebase-config.mjs
-      - name: Install and build web
+      - name: Install, build web, sync iOS
         script: |
+          set -e
           npm ci
-          npm run build
-      - name: Capacitor sync
-        script: npx cap sync ios
+          # build + cap sync ios + strip the Google Play references out of the
+          # packaged assets, which App Review rejected under guideline 2.3.10.
+          # The script fails the build if it finds one it cannot remove.
+          npm run sync:ios
       - name: Set build number
         script: |
           set -e

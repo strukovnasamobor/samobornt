@@ -9,6 +9,7 @@
     "build": "vite build",
     "firebase:config": "node scripts/write-firebase-config.mjs",
     "sync:android": "npm run build && cap sync android && node scripts/trim-android-assets.mjs",
+    "sync:ios": "npm run build && cap sync ios && node scripts/trim-ios-assets.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest"

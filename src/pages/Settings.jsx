@@ -1,5 +1,6 @@
 import "./Settings.css";
 import PageLayout from "../components/PageLayout";
+import { Capacitor } from "@capacitor/core";
 import { IonButton, IonCol, IonGrid, IonIcon, IonModal, IonRow } from "@ionic/react";
 import {
   documentTextOutline,
@@ -17,16 +18,31 @@ import SelectMode from "../components/SelectMode";
 // Android app the WebView hands anything off-origin to the system browser,
 // while the privacy policy, being the app's own domain, opens in place and the
 // system back button returns from it.
+//
+// hideOnIos marks a link App Review will not have inside the iOS app: guideline
+// 2.3.10 counts a pointer to another app store as information about a
+// third-party platform that is irrelevant to App Store users, and the Play
+// listing below had the build rejected. One web build serves the browser, the
+// Android app and the iOS shell alike - the shell loads samobornt.web.app
+// rather than its own copy - so the link has to be dropped at runtime here,
+// not stripped from the bundle. scripts/trim-ios-assets.mjs then takes the same
+// references back out of the assets Capacitor packages into the IPA.
 const LINKS = [
   { key: "webapp", icon: globeOutline, url: "https://samobornt.web.app/" },
   {
     key: "googlePlay",
     icon: logoGooglePlaystore,
     url: "https://play.google.com/store/apps/details?id=com.strukovnasamobor.samobornt",
+    hideOnIos: true,
   },
   { key: "privacyPolicy", icon: documentTextOutline, url: "https://samobornt.web.app/privacy_policy.html" },
   { key: "source", icon: logoGithub, url: "https://github.com/strukovnasamobor/samobornt" },
 ];
+
+// getPlatform() is "ios" only inside the iOS shell; mobile Safari on the same
+// page reports "web" and keeps the full list.
+const VISIBLE_LINKS =
+  Capacitor.getPlatform() === "ios" ? LINKS.filter((link) => !link.hideOnIos) : LINKS;
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -60,7 +76,7 @@ export default function Settings() {
         <IonRow className="center">
           <IonCol size="12">
             <div className="settings-actions">
-              {LINKS.map(({ key, icon, url }) => (
+              {VISIBLE_LINKS.map(({ key, icon, url }) => (
                 <IonButton
                   key={key}
                   className="settings-action"
