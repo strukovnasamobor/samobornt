@@ -19,30 +19,36 @@ import SelectMode from "../components/SelectMode";
 // while the privacy policy, being the app's own domain, opens in place and the
 // system back button returns from it.
 //
-// hideOnIos marks a link App Review will not have inside the iOS app: guideline
-// 2.3.10 counts a pointer to another app store as information about a
-// third-party platform that is irrelevant to App Store users, and the Play
-// listing below had the build rejected. One web build serves the browser, the
-// Android app and the iOS shell alike - the shell loads samobornt.web.app
-// rather than its own copy - so the link has to be dropped at runtime here,
-// not stripped from the bundle. scripts/trim-ios-assets.mjs then takes the same
-// references back out of the assets Capacitor packages into the IPA.
+// hideOnApple marks a link App Review will not have: guideline 2.3.10 counts a
+// pointer to another app store as information about a third-party platform that
+// is irrelevant to App Store users, and the Play listing below had the build
+// rejected. One web build serves the browser, the Android app and the iOS shell
+// alike - the shell loads samobornt.web.app rather than its own copy - so the
+// link has to be dropped at runtime here, not stripped from the bundle.
+// scripts/trim-ios-assets.mjs then takes the same references back out of the
+// assets Capacitor packages into the IPA.
 const LINKS = [
   { key: "webapp", icon: globeOutline, url: "https://samobornt.web.app/" },
   {
     key: "googlePlay",
     icon: logoGooglePlaystore,
     url: "https://play.google.com/store/apps/details?id=com.strukovnasamobor.samobornt",
-    hideOnIos: true,
+    hideOnApple: true,
   },
   { key: "privacyPolicy", icon: documentTextOutline, url: "https://samobornt.web.app/privacy_policy.html" },
   { key: "source", icon: logoGithub, url: "https://github.com/strukovnasamobor/samobornt" },
 ];
 
-// getPlatform() is "ios" only inside the iOS shell; mobile Safari on the same
-// page reports "web" and keeps the full list.
-const VISIBLE_LINKS =
-  Capacitor.getPlatform() === "ios" ? LINKS.filter((link) => !link.hideOnIos) : LINKS;
+// Nothing Apple sells has a use for a Google Play link, and App Review reaches
+// the web app from the Settings link above, so it must not find one there
+// either. getPlatform() answers "ios" only inside the native shell - the same
+// page opened in Safari reports "web" - so the device is asked as well.
+// "Macintosh" covers the Mac and, because iPadOS 13+ claims to be one, the iPad
+// that hides behind a desktop user agent; both belong on the same side here.
+const IS_APPLE =
+  Capacitor.getPlatform() === "ios" || /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
+
+const VISIBLE_LINKS = IS_APPLE ? LINKS.filter((link) => !link.hideOnApple) : LINKS;
 
 export default function Settings() {
   const { t } = useTranslation();
