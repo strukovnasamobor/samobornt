@@ -6,6 +6,7 @@ import {
   documentTextOutline,
   globeOutline,
   informationCircleOutline,
+  logoAppleAppstore,
   logoGithub,
   logoGooglePlaystore,
 } from "ionicons/icons";
@@ -19,21 +20,31 @@ import SelectMode from "../components/SelectMode";
 // while the privacy policy, being the app's own domain, opens in place and the
 // system back button returns from it.
 //
-// hideOnApple marks a link App Review will not have: guideline 2.3.10 counts a
-// pointer to another app store as information about a third-party platform that
-// is irrelevant to App Store users, and the Play listing below had the build
-// rejected. One web build serves the browser, the Android app and the iOS shell
-// alike - the shell loads samobornt.web.app rather than its own copy - so the
-// link has to be dropped at runtime here, not stripped from the bundle.
-// scripts/trim-ios-assets.mjs then takes the same references back out of the
-// assets Capacitor packages into the IPA.
+// webOnly marks the store listings: someone already inside one of the apps has
+// no use for a link to install it. One web build serves the browser, the
+// Android app and the iOS shell alike - both shells load samobornt.web.app
+// rather than their own copy - so these have to be dropped at runtime here, not
+// stripped from the bundle.
+//
+// hideOnApple marks a link App Review will not have, even on the web: guideline
+// 2.3.10 counts a pointer to another app store as information about a
+// third-party platform that is irrelevant to App Store users, and the Play
+// listing below had the build rejected. scripts/trim-ios-assets.mjs then takes
+// the same references back out of the assets Capacitor packages into the IPA.
 const LINKS = [
   { key: "webapp", icon: globeOutline, url: "https://samobornt.web.app/" },
   {
     key: "googlePlay",
     icon: logoGooglePlaystore,
     url: "https://play.google.com/store/apps/details?id=com.strukovnasamobor.samobornt",
+    webOnly: true,
     hideOnApple: true,
+  },
+  {
+    key: "appStore",
+    icon: logoAppleAppstore,
+    url: "https://apps.apple.com/app/samobor-n-t/id6805843670",
+    webOnly: true,
   },
   { key: "privacyPolicy", icon: documentTextOutline, url: "https://samobornt.web.app/privacy_policy.html" },
   { key: "source", icon: logoGithub, url: "https://github.com/strukovnasamobor/samobornt" },
@@ -48,7 +59,14 @@ const LINKS = [
 const IS_APPLE =
   Capacitor.getPlatform() === "ios" || /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
 
-const VISIBLE_LINKS = IS_APPLE ? LINKS.filter((link) => !link.hideOnApple) : LINKS;
+// True in both store builds: the shells inject the Capacitor bridge into the
+// remote page they load, so it reports native even though the code is served
+// from the web.
+const IS_NATIVE = Capacitor.isNativePlatform();
+
+const VISIBLE_LINKS = LINKS.filter(
+  (link) => !(link.webOnly && IS_NATIVE) && !(link.hideOnApple && IS_APPLE)
+);
 
 export default function Settings() {
   const { t } = useTranslation();
