@@ -12,7 +12,8 @@ workflows:
         # (firebase.js is gitignored, so CI regenerates it before the web build).
         - ios-release
       vars:
-        APP_ID: 6805843670
+        # The numeric Apple ID from App Store Connect > App Information (not the bundle id)
+        APP_STORE_APPLE_ID: 6805843670
         BUNDLE_ID: hr.strukovnasamobor.samobornt
         XCODE_SCHEME: "App"
       node: 22
@@ -21,14 +22,12 @@ workflows:
     scripts:
       - name: Generate firebase.js
         script: node scripts/write-firebase-config.mjs
-      - name: Install, build web, sync iOS
+      - name: Install and build web
         script: |
-          set -e
           npm ci
-          # build + cap sync ios + strip the Google Play references out of the
-          # packaged assets, which App Review rejected under guideline 2.3.10.
-          # The script fails the build if it finds one it cannot remove.
-          npm run sync:ios
+          npm run build
+      - name: Capacitor sync
+        script: npx cap sync ios
       - name: Set build number
         script: |
           set -e
@@ -36,7 +35,13 @@ workflows:
           # that matters (App Store Connect rejects duplicates against it), but the
           # released App Store number is checked too in case it is ever ahead.
           # Either command exits non-zero when there is nothing to report, hence
-          # the fallbacks and the integer guard.
+          # the fallbacks and the integer guard. Their stderr stays in the log so
+          # a failed lookup is visible instead of silently becoming 0.
+          case "$APP_STORE_APPLE_ID" in
+            '' | *[!0-9]* )
+              echo "ERROR: APP_STORE_APPLE_ID must be the numeric Apple ID (App Store Connect > App Information)."
+              exit 1 ;;
+          esac
           num_or_zero() {
             v=$(printf '%s' "$1" | tr -d '[:space:]')
             case "$v" in
@@ -44,10 +49,16 @@ workflows:
               * ) echo "$v" ;;
             esac
           }
-          TF=$(num_or_zero "$(app-store-connect get-latest-testflight-build-number "$APP_ID" 2>/dev/null | tail -1)")
-          AS=$(num_or_zero "$(app-store-connect get-latest-app-store-build-number "$APP_ID" 2>/dev/null | tail -1)")
+          TF=$(num_or_zero "$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" | tail -1)")
+          AS=$(num_or_zero "$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" | tail -1)")
           LATEST=$TF
           if [ "$AS" -gt "$LATEST" ]; then LATEST=$AS; fi
+          # Build 1 is already uploaded, so 0 now always means the lookup failed.
+          # Stop here rather than after a full build that App Store Connect rejects.
+          if [ "$LATEST" -eq 0 ]; then
+            echo "ERROR: no previous build found for app $APP_STORE_APPLE_ID. Check the Apple ID and the API key's access."
+            exit 1
+          fi
           BUILD_NUMBER=$((LATEST + 1))
           echo "TestFlight=$TF AppStore=$AS -> building $BUILD_NUMBER"
           cd ios-capacitor/App
