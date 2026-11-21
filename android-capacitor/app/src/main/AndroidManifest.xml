@@ -35,6 +35,13 @@
         </provider>
     </application>
 
+    <!-- Scene Viewer lives in the Google app. Its version is read to remember
+         which build failed to open AR (see MainActivity), and Android 11+
+         hides other apps' package info unless they are declared here. -->
+    <queries>
+        <package android:name="com.google.android.googlequicksearchbox" />
+    </queries>
+
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />

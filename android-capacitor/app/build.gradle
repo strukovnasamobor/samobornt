@@ -22,7 +22,7 @@ if (signingPropsFile.exists()) {
         }
         def storeName = fields['Key store file'] ? new File(fields['Key store file']).name : null
         if (storeName && fields['Key store password'] && fields['Key alias'] && fields['Key password']) {
-            signingProps['storeFile'] = rootProject.file('../.google_play/' + storeName).absolutePath
+                   signingProps['storeFile'] = rootProject.file('../.google_play/' + storeName).absolutePath
             signingProps['storePassword'] = fields['Key store password']
             signingProps['keyAlias'] = fields['Key alias']
             signingProps['keyPassword'] = fields['Key password']
@@ -38,7 +38,7 @@ android {
         applicationId "com.strukovnasamobor.samobornt"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 14
+        versionCode 15
         versionName "2.3.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {

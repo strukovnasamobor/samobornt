@@ -2,9 +2,12 @@ package com.strukovnasamobor.samobornt;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -16,6 +19,7 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.pm.PackageInfoCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -29,6 +33,17 @@ import java.net.URISyntaxException;
 public class MainActivity extends BridgeActivity {
 
     private static final String TAG = "SamoborNT";
+
+    // Scene Viewer is part of the Google app, and since its October 2026
+    // updates (17.66+) it crashes or closes itself right after opening, for any
+    // model - google-ar/arcore-android-sdk#1795 and #1797. Back here sooner
+    // than this counts as a failed launch rather than a short AR session.
+    private static final String SCENE_VIEWER_PACKAGE = "com.google.android.googlequicksearchbox";
+    private static final long SCENE_VIEWER_MIN_SESSION_MS = 1500;
+    private static final String PREF_BROKEN_SCENE_VIEWER = "sceneViewerBrokenVersion";
+
+    // When Scene Viewer was started, or 0 when it is not open.
+    private long sceneViewerLaunchedAt = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -96,9 +111,24 @@ public class MainActivity extends BridgeActivity {
                         return true;
                     }
 
+                    // Scene Viewer that already failed on this Google app build
+                    // is not tried again: the page goes straight to its WebXR
+                    // fallback. A Google app update gets a fresh chance.
+                    boolean sceneViewer = SCENE_VIEWER_PACKAGE.equals(intent.getPackage());
+                    if (sceneViewer) {
+                        long version = googleAppVersionCode();
+                        if (version != -1 && version == getPreferences().getLong(PREF_BROKEN_SCENE_VIEWER, -1)) {
+                            Log.i(TAG, "Scene Viewer failed before on Google app " + version + "; using WebXR fallback");
+                            notifyArFallback();
+                            return true;
+                        }
+                    }
+
                     try {
+                        if (sceneViewer) sceneViewerLaunchedAt = SystemClock.elapsedRealtime();
                         startActivity(intent);
                     } catch (ActivityNotFoundException e) {
+                        sceneViewerLaunchedAt = 0;
                         // Scene Viewer missing (no Play services for AR, or a
                         // device without it): the intent carries the page to send
                         // the user to instead. Only honoured for the main frame:
@@ -195,6 +225,46 @@ public class MainActivity extends BridgeActivity {
      */
     private void applyStatusBarIcons() {
         WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightStatusBars(false);
+    }
+
+    /**
+     * Back from Scene Viewer: if it closed almost at once it never showed the
+     * model, so the Google app build is recorded as broken and the page is told
+     * to open the scene where WebXR works instead.
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (sceneViewerLaunchedAt == 0) return;
+
+        long elapsed = SystemClock.elapsedRealtime() - sceneViewerLaunchedAt;
+        sceneViewerLaunchedAt = 0;
+        Log.i(TAG, "Scene Viewer resumed after " + elapsed + "ms");
+        if (elapsed >= SCENE_VIEWER_MIN_SESSION_MS) return;
+
+        long version = googleAppVersionCode();
+        if (version != -1) {
+            getPreferences().edit().putLong(PREF_BROKEN_SCENE_VIEWER, version).apply();
+        }
+        notifyArFallback();
+    }
+
+    private SharedPreferences getPreferences() {
+        return getSharedPreferences("samobornt", MODE_PRIVATE);
+    }
+
+    /** The installed Google app's version code, or -1 when it is not installed. */
+    private long googleAppVersionCode() {
+        try {
+            return PackageInfoCompat.getLongVersionCode(getPackageManager().getPackageInfo(SCENE_VIEWER_PACKAGE, 0));
+        } catch (PackageManager.NameNotFoundException e) {
+            return -1;
+        }
+    }
+
+    /** ArViewer.jsx listens for this and opens the scene in a Chrome Custom Tab. */
+    private void notifyArFallback() {
+        this.bridge.triggerWindowJSEvent("samobornt:ar-fallback");
     }
 
     @Override

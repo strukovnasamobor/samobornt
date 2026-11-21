@@ -78,6 +78,22 @@ export default function ArViewer() {
     return () => window.removeEventListener("message", onMessage);
   }, [id]);
 
+  // Inside the Android app the scene can only reach AR through Google's Scene
+  // Viewer - the WebView has no WebXR - and Scene Viewer has been crashing or
+  // closing on open since the Google app's October 2026 updates
+  // (google-ar/arcore-android-sdk#1795, #1797). MainActivity notices it coming
+  // straight back and sends this; the scene then opens in a Chrome Custom Tab,
+  // where model-viewer goes through WebXR, which those same phones run fine.
+  // AR there needs one more tap on the button: WebXR only starts from a gesture.
+  useEffect(() => {
+    if (Capacitor.getPlatform() !== "android" || !Capacitor.isPluginAvailable("Browser")) return;
+    const onFallback = () => {
+      Browser.open({ url: `${window.location.origin}/ar/${id}/index.html?lang=${language}` });
+    };
+    window.addEventListener("samobornt:ar-fallback", onFallback);
+    return () => window.removeEventListener("samobornt:ar-fallback", onFallback);
+  }, [id, language]);
+
   // Android has a system back button; iOS has only this. A scene opened
   // straight from a link has nothing to pop, so it lands on the sights list.
   const goBack = () => {

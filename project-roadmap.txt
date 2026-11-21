@@ -1,2 +1,2 @@
 CURRENT VERSION
-Ver. 2.3.0 (android: 14, ios: 5)
+Ver. 2.3.0 (android: 15, ios: 5)
